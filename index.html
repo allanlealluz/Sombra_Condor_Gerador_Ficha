@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sombra do Condor - Criador de Fichas</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --panel-color: #202024;
+            --accent-color: #8257e6;
+            --text-color: #e1e1e6;
+            --highlight: #29292e;
+            --danger: #e83f5b;
+            --success: #04d361;
+        }
+
+        body {
+            font-family: 'Roboto', 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 20px;
+        }
+
+        .main-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .panel {
+            background-color: var(--panel-color);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #323238;
+            height: fit-content;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: var(--accent-color);
+            margin-top: 0;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tracker-badge {
+            font-size: 0.8rem;
+            background: #000;
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid #555;
+            color: white;
+        }
+        .tracker-badge.error { border-color: var(--danger); color: var(--danger); }
+        .tracker-badge.ok { border-color: var(--success); color: var(--success); }
+
+        input[type="number"], input[type="text"], textarea {
+            background: var(--bg-color);
+            border: 1px solid #444;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        textarea { font-family: inherit; }
+        input[type="number"] { text-align: center; font-weight: bold; }
+
+        .skills-container {
+            max-height: 700px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .skills-container::-webkit-scrollbar { width: 6px; }
+        .skills-container::-webkit-scrollbar-thumb { background-color: var(--accent-color); border-radius: 3px; }
+
+        .skill-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.02);
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+
+        .skill-name { font-size: 0.9rem; }
+        .skill-attr { font-size: 0.7rem; color: #888; margin-left: 5px; text-transform: uppercase; }
+        .skill-input { width: 45px; margin-left: 10px; }
+        .skill-input:invalid { border-color: var(--danger); background-color: rgba(232, 63, 91, 0.1); }
+
+        .stat-block {
+            background: var(--highlight);
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stat-label { font-weight: bold; font-size: 1rem; }
+
+        .big-stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .big-stat-box {
+            background: #000;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--accent-color);
+        }
+        .big-stat-value { font-size: 1.8rem; font-weight: bold; }
+        .big-stat-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
+
+        .entry-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: var(--highlight);
+            padding: 10px;
+            border-radius: 6px;
+        }
+        .entry-list { list-style: none; padding: 0; margin: 0; }
+        .entry-item {
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid var(--accent-color);
+        }
+        .entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .entry-name { font-weight: bold; color: white; }
+        .entry-meta { color: #aaa; font-size: 0.85rem; margin-right: 10px; }
+        .entry-desc { font-size: 0.85rem; color: #bbb; display: block; word-wrap: break-word; margin-top: 4px;}
+
+        button { cursor: pointer; border-radius: 4px; font-weight: bold; border: none; }
+        button.add-btn { background-color: var(--accent-color); color: white; padding: 10px; width: 100%; }
+        button.remove-btn { background: var(--danger); color: white; padding: 2px 6px; font-size: 0.8rem; }
+        
+        button.download-btn {
+            background-color: var(--success); color: #000;
+            padding: 15px; width: 100%; font-size: 1.1rem;
+            margin-top: 20px; grid-column: 1 / -1;
+            box-shadow: 0 0 10px rgba(4, 211, 97, 0.3);
+        }
+        button.download-btn:hover { background-color: #03bb56; }
+
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="main-title">Sombra do Condor</div>
+
+        <div class="panel">
+            <h2>
+                Perícias 
+                <span id="skillTracker" class="tracker-badge">Slots: 0/2</span>
+            </h2>
+            <p style="font-size:0.75rem; color:#888; margin-top:-10px;">
+                Base: 2 | +2x por INT | +1 a cada 5 Exp<br>
+                Máx Nível: +10 (<30 Exp) ou +20 (30+ Exp)
+            </p>
+            <div id="skillsContainer" class="skills-container"></div>
+        </div>
+
+        <div>
+            <div class="panel">
+                <h2>
+                    Atributos
+                    <span id="attrTracker" class="tracker-badge">Pontos: 0/9</span>
+                </h2>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display:block; font-size:0.8rem; color:#aaa;">Nome / Codinome</label>
+                    <input type="text" id="charName" style="width: 96%;" placeholder="Ex: Kaua Silva (O monstro)">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display:block; font-size:0.8rem; color:#aaa;">Descrição Física / Idade</label>
+                    <textarea id="charDesc" rows="2" style="width: 96%;" placeholder="Ex: Um jovem de 26 anos, 1.77 85 kg corpo musculoso"></textarea>
+                </div>
+
+                <div class="stat-block" style="background: rgba(130, 87, 230, 0.1); border: 1px solid var(--accent-color);">
+                    <span class="stat-label">EXPERIÊNCIA (EXP)</span>
+                    <input type="number" id="exp" value="5" min="5" onchange="calcularTudo()">
+                </div>
+
+                <div class="stat-block"><span class="stat-label">FORÇA</span><input type="number" id="attrForca" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">AGILIDADE</span><input type="number" id="attrAgilidade" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">VIGOR</span><input type="number" id="attrVigor" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">PRESENÇA</span><input type="number" id="attrPresenca" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">INTELECTO</span><input type="number" id="attrIntelecto" value="1" min="0" onchange="calcularTudo()"></div>
+
+                <div class="big-stat-grid">
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayPV">10</div><div class="big-stat-label">Vitalidade</div></div>
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayDefesa">11</div><div class="big-stat-label">Defesa</div></div>
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayPE">0</div><div class="big-stat-label">P. Esforço</div></div>
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayCarga">0</div><div class="big-stat-label">Carga Máx</div></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>
+                    Habilidades
+                    <span id="habTracker" class="tracker-badge">Habs: 0/2</span>
+                </h2>
+                <div class="entry-form">
+                    <input type="text" id="newHabName" placeholder="Nome (Ex: Ippon Seoi Nage)" style="width: 93%;">
+                    <textarea id="newHabDesc" placeholder="Descrição (Efeito, Custo...)" rows="3" style="width: 93%; resize: vertical;"></textarea>
+                    <button class="add-btn" onclick="adicionarHabilidade()">ADICIONAR HABILIDADE</button>
+                </div>
+                <ul id="habList" class="entry-list"></ul>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>
+                Inventário
+                <span id="loadTracker" class="tracker-badge">Peso: 0</span>
+            </h2>
+            <div class="entry-form">
+                <input type="text" id="newItemName" placeholder="Nome do Item" style="width: 93%;">
+                <div style="display:flex; gap:5px;">
+                    <input type="number" id="newItemWeight" placeholder="Peso" style="width: 70px;">
+                    <input type="text" id="newItemDesc" placeholder="Descrição / Dano" style="flex-grow:1;">
+                </div>
+                <button class="add-btn" onclick="adicionarItem()">ADICIONAR ITEM</button>
+            </div>
+            <ul id="inventoryList" class="entry-list"></ul>
+        </div>
+
+        <button class="download-btn" onclick="baixarFicha()">💾 BAIXAR FICHA (.TXT)</button>
+    </div>
+
+    <script>
+        const periciasList = [
+            { nome: "Acrobacia", attr: "AGI" }, { nome: "Adestramento", attr: "PRE" },
+            { nome: "Artes", attr: "PRE" }, { nome: "Atletismo", attr: "FOR" },
+            { nome: "Atualidades", attr: "INT" }, { nome: "Ciências", attr: "INT" },
+            { nome: "Crime", attr: "AGI" }, { nome: "Cura", attr: "INT" },
+            { nome: "Diplomacia", attr: "PRE" }, { nome: "Enganação", attr: "PRE" },
+            { nome: "Engenharia", attr: "INT" }, { nome: "Fortitude", attr: "VIG" },
+            { nome: "Furtividade", attr: "AGI" }, { nome: "Iniciativa", attr: "AGI" },
+            { nome: "Intimidação", attr: "PRE" }, { nome: "Intuição", attr: "PRE" },
+            { nome: "Investigação", attr: "INT" }, { nome: "Luta", attr: "FOR" },
+            { nome: "Medicina", attr: "INT" }, { nome: "Percepção", attr: "PRE" },
+            { nome: "Pilotagem", attr: "AGI" }, { nome: "Pontaria", attr: "AGI" },
+            { nome: "Reflexos", attr: "AGI" }, { nome: "Religião", attr: "PRE" },
+            { nome: "Sobrevivência", attr: "INT" }, { nome: "Tática", attr: "INT" },
+            { nome: "Tecnologia", attr: "INT" }, { nome: "Vontade", attr: "PRE" }
+        ];
+
+        let inventario = [];
+        let habilidades = [];
+
+        window.onload = function() {
+            gerarListaPericias();
+            calcularTudo();
+        };
+
+        function gerarListaPericias() {
+            const container = document.getElementById('skillsContainer');
+            container.innerHTML = '';
+            periciasList.forEach(pericia => {
+                const inputId = pericia.nome === "Atletismo" ? "skill_Atletismo" : 
+                                pericia.nome === "Fortitude" ? "skill_Fortitude" : `skill_${pericia.nome}`;
+                
+                const div = document.createElement('div');
+                div.className = 'skill-row';
+                div.innerHTML = `
+                    <div><span class="skill-name">${pericia.nome}</span> <span class="skill-attr">(${pericia.attr})</span></div>
+                    <input type="number" id="${inputId}" class="skill-input" value="0" min="0" step="5" onchange="calcularTudo()">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function calcularTudo() {
+            const rawExp = parseInt(document.getElementById('exp').value) || 5;
+            const expEfetiva = Math.max(0, rawExp - 5); 
+
+            const forca = parseInt(document.getElementById('attrForca').value) || 0;
+            const agilidade = parseInt(document.getElementById('attrAgilidade').value) || 0;
+            const vigor = parseInt(document.getElementById('attrVigor').value) || 0;
+            const presenca = parseInt(document.getElementById('attrPresenca').value) || 0;
+            const intelecto = parseInt(document.getElementById('attrIntelecto').value) || 0;
+
+            const pontosAttrBase = 9; 
+            const pontosAttrBonus = Math.floor(expEfetiva / 5);
+            const maxPontosAttr = pontosAttrBase + pontosAttrBonus;
+            const pontosGastos = forca + agilidade + vigor + presenca + intelecto;
+            
+            atualizarTracker('attrTracker', pontosGastos, maxPontosAttr, "Pontos");
+
+            // --- CÁLCULO DE PV (VITALIDADE) ---
+            // Regra: Base 10 + 2x Vigor + 1 por EXP efetiva + 1 a cada 5 EXP efetiva + FORTITUDE (valor da perícia)
+            const pvBase = 10;
+            const pvVigor = vigor * 2;
+            const pvExpSimples = expEfetiva;
+            const pvExpMilestone = Math.floor(expEfetiva / 5);
+            
+            // Pega o valor da perícia Fortitude
+            const skillFortitude = document.getElementById('skill_Fortitude');
+            const valFortitude = skillFortitude ? (parseInt(skillFortitude.value) || 0) : 0;
+            
+            const pvTotal = pvBase + pvVigor + pvExpSimples + pvExpMilestone + valFortitude;
+            document.getElementById('displayPV').innerText = pvTotal;
+
+            // --- OUTROS STATUS ---
+            document.getElementById('displayDefesa').innerText = 10 + agilidade;
+            document.getElementById('displayPE').innerText = 5 + presenca + vigor + Math.floor(expEfetiva / 2);
+
+            // --- CARGA ---
+            const skillAtletismo = document.getElementById('skill_Atletismo');
+            const valAtletismo = skillAtletismo ? (parseInt(skillAtletismo.value) || 0) : 0;
+            const cargaTotal = 5 + (forca * 2) + (Math.floor(valAtletismo / 5) * 2);
+            document.getElementById('displayCarga').innerText = cargaTotal;
+            atualizarPesoInventario(cargaTotal);
+
+            // --- TRACKERS DE PERÍCIA ---
+            const maxSkillValue = (rawExp >= 30) ? 20 : 10;
+            const slotsBase = 2;
+            const slotsInt = intelecto * 2;
+            const slotsExp = Math.floor(expEfetiva / 5);
+            const maxSlots = slotsBase + slotsInt + slotsExp;
+            let slotsGastos = 0;
+
+            const inputs = document.querySelectorAll('.skill-input');
+            inputs.forEach(input => {
+                let val = parseInt(input.value) || 0;
+                if (val > maxSkillValue) {
+                    input.style.borderColor = "var(--danger)";
+                    input.style.color = "var(--danger)";
+                } else {
+                    input.style.borderColor = "#444";
+                    input.style.color = "white";
+                }
+                slotsGastos += Math.floor(val / 5);
+            });
+            atualizarTracker('skillTracker', slotsGastos, maxSlots, "Slots");
+
+            // --- TRACKER HABILIDADE ---
+            const habsMax = 2 + intelecto + Math.floor(expEfetiva / 5);
+            atualizarTracker('habTracker', habilidades.length, habsMax, "Habs");
+        }
+
+        function atualizarTracker(id, atual, maximo, label) {
+            const el = document.getElementById(id);
+            el.innerText = `${label}: ${atual}/${maximo}`;
+            el.className = (atual > maximo) ? 'tracker-badge error' : 'tracker-badge ok';
+            if (atual > maximo) el.innerText += " (!)";
+        }
+
+        // --- HABILIDADES ---
+        function adicionarHabilidade() {
+            const nome = document.getElementById('newHabName').value;
+            const desc = document.getElementById('newHabDesc').value;
+            if(!nome) return;
+            habilidades.push({ nome, desc });
+            document.getElementById('newHabName').value = '';
+            document.getElementById('newHabDesc').value = '';
+            renderizarHabilidades();
+            calcularTudo();
+        }
+
+        function removerHabilidade(index) {
+            habilidades.splice(index, 1);
+            renderizarHabilidades();
+            calcularTudo();
+        }
+
+        function renderizarHabilidades() {
+            const lista = document.getElementById('habList');
+            lista.innerHTML = '';
+            habilidades.forEach((hab, index) => {
+                const li = document.createElement('li');
+                li.className = 'entry-item';
+                li.innerHTML = `
+                    <div class="entry-header">
+                        <span class="entry-name">${hab.nome}</span>
+                        <button class="remove-btn" onclick="removerHabilidade(${index})">X</button>
+                    </div>
+                    <span class="entry-desc">${hab.desc}</span>
+                `;
+                lista.appendChild(li);
+            });
+        }
+
+        // --- ITENS ---
+        function adicionarItem() {
+            const nome = document.getElementById('newItemName').value;
+            const peso = parseInt(document.getElementById('newItemWeight').value) || 0;
+            const desc = document.getElementById('newItemDesc').value;
+            if (!nome) return;
+            inventario.push({ nome, peso, desc });
+            document.getElementById('newItemName').value = '';
+            document.getElementById('newItemWeight').value = '';
+            document.getElementById('newItemDesc').value = '';
+            renderizarInventario();
+            calcularTudo();
+        }
+
+        function removerItem(index) {
+            inventario.splice(index, 1);
+            renderizarInventario();
+            calcularTudo();
+        }
+
+        function renderizarInventario() {
+            const lista = document.getElementById('inventoryList');
+            lista.innerHTML = '';
+            inventario.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'entry-item';
+                li.innerHTML = `
+                    <div class="entry-header">
+                        <span class="entry-name">${item.nome}</span>
+                        <div>
+                            <span class="entry-meta">${item.peso}kg</span>
+                            <button class="remove-btn" onclick="removerItem(${index})">X</button>
+                        </div>
+                    </div>
+                    <span class="entry-desc">${item.desc || ""}</span>
+                `;
+                lista.appendChild(li);
+            });
+        }
+
+        function atualizarPesoInventario(cargaMax) {
+            let pesoTotal = 0;
+            inventario.forEach(i => pesoTotal += i.peso);
+            const tracker = document.getElementById('loadTracker');
+            tracker.innerText = `Peso: ${pesoTotal}/${cargaMax}`;
+            tracker.className = pesoTotal > cargaMax ? 'tracker-badge error' : 'tracker-badge ok';
+        }
+
+        // --- GERAÇÃO DO ARQUIVO TXT NO FORMATO SOLICITADO ---
+        function baixarFicha() {
+            const nome = document.getElementById('charName').value || "Sem Nome";
+            const descFisica = document.getElementById('charDesc').value || "";
+            const exp = document.getElementById('exp').value;
+            const pv = document.getElementById('displayPV').innerText;
+            const pe = document.getElementById('displayPE').innerText;
+            const def = document.getElementById('displayDefesa').innerText;
+            
+            const forca = document.getElementById('attrForca').value;
+            const agi = document.getElementById('attrAgilidade').value;
+            const vig = document.getElementById('attrVigor').value;
+            const pre = document.getElementById('attrPresenca').value;
+            const int = document.getElementById('attrIntelecto').value;
+
+            // Construção exata do layout solicitado
+            let texto = `${nome}\n\n`;
+            if (descFisica) texto += `Descrição: ${descFisica}\n\n`;
+            
+            texto += `Exp:${exp}\n\n`;
+            texto += `Vitalidade: ${pv}\n`;
+            texto += `Força: ${forca}\n`;
+            texto += `Agilidade: ${agi}\n`;
+            texto += `Presença: ${pre}\n`;
+            texto += `Vigor: ${vig}\n`;
+            texto += `Intelecto: ${int}\n`;
+            texto += `Pontos de Esforço (PE): ${pe}\n\n`;
+            texto += `Defesa:${def}\n\n`;
+
+            texto += `Itens\n\n`;
+            if (inventario.length === 0) texto += `(Nenhum item)\n`;
+            inventario.forEach(item => {
+                // Formato: Nome: Descrição
+                let descFormatada = item.desc ? `: ${item.desc}` : "";
+                texto += `${item.nome}${descFormatada}\n\n`;
+            });
+
+            texto += `Pericias: ____________________________________________\n`;
+            const inputs = document.querySelectorAll('.skill-input');
+            inputs.forEach(input => {
+                if(parseInt(input.value) > 0) {
+                    const nomeSkill = input.previousElementSibling.querySelector('.skill-name').innerText;
+                    texto += `${nomeSkill} +${input.value}\n`;
+                }
+            });
+
+            texto += `\nHabilidades\n\n`;
+            habilidades.forEach(h => {
+                // Formato: Nome:Descrição
+                texto += `${h.nome}:${h.desc}\n\n`;
+            });
+
+            const blob = new Blob([texto], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Ficha_${nome.replace(/\s+/g, '_')}.txt`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
