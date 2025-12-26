@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sombra do Condor - Criador de Fichas</title>
-    <link rel="shortcut icon" href="sombra do condor.png" type="image/x-icon">
     <style>
         :root {
             --bg-color: #121214;
@@ -316,16 +315,18 @@
             const intelecto = parseInt(document.getElementById('attrIntelecto').value) || 0;
 
             const pontosAttrBase = 9; 
-            const pontosAttrBonus = Math.floor(expEfetiva / 5);
+            // ALTERAÇÃO AQUI: Agora divide por 10 em vez de 5
+            const pontosAttrBonus = Math.floor(expEfetiva / 10);
             const maxPontosAttr = pontosAttrBase + pontosAttrBonus;
             const pontosGastos = forca + agilidade + vigor + presenca + intelecto;
             
             atualizarTracker('attrTracker', pontosGastos, maxPontosAttr, "Pontos");
 
             // --- CÁLCULO DE PV (VITALIDADE) ---
-            // Regra: Base 10 + 2x Vigor + 1 por EXP efetiva + 1 a cada 5 EXP efetiva + FORTITUDE (valor da perícia)
+            // Regra: Base 10 + 3x Vigor (ALTERADO) + 1 por EXP efetiva + 1 a cada 5 EXP efetiva + FORTITUDE
             const pvBase = 10;
-            const pvVigor = vigor * 2;
+            // ALTERAÇÃO AQUI: Vigor multiplica por 3
+            const pvVigor = vigor * 3;
             const pvExpSimples = expEfetiva;
             const pvExpMilestone = Math.floor(expEfetiva / 5);
             
