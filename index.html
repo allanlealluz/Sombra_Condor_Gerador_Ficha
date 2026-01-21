@@ -340,7 +340,7 @@
 
             // --- OUTROS STATUS ---
             document.getElementById('displayDefesa').innerText = 10 + agilidade;
-            document.getElementById('displayPE').innerText = 5 + presenca + vigor + Math.floor(expEfetiva / 2);
+            document.getElementById('displayPE').innerText =(forca + presenca + vigor )*2+ Math.floor(expEfetiva / 3);
 
             // --- CARGA ---
             const skillAtletismo = document.getElementById('skill_Atletismo');
