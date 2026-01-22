@@ -54,6 +54,14 @@
             height: fit-content;
             margin-bottom: 20px;
         }
+        .panel-lateral {
+            background-color: var(--panel-color);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #323238;
+            height: fit-content;
+            margin-bottom: 20px;
+        }
 
         h2 {
             color: var(--accent-color);
@@ -106,7 +114,22 @@
             padding: 5px 8px;
             border-radius: 4px;
         }
-
+        .habs-container{
+            max-height: 700px;
+            overflow-y: auto;
+            padding-left: 5px;
+        }
+        .habs-container::-webkit-scrollbar { width: 6px; }
+        .habs-container::-webkit-scrollbar-thumb { background-color: var(--accent-color); border-radius: 3px; }
+        .habs-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.02);
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
         .skill-name { font-size: 0.9rem; }
         .skill-attr { font-size: 0.7rem; color: #888; margin-left: 5px; text-transform: uppercase; }
         .skill-input { width: 45px; margin-left: 10px; }
@@ -194,6 +217,7 @@
         </div>
 
         <div>
+            
             <div class="panel">
                 <h2>
                     Atributos
@@ -226,6 +250,7 @@
                     <div class="big-stat-box"><div class="big-stat-value" id="displayDefesa">11</div><div class="big-stat-label">Defesa</div></div>
                     <div class="big-stat-box"><div class="big-stat-value" id="displayPE">0</div><div class="big-stat-label">P. Esforço</div></div>
                     <div class="big-stat-box"><div class="big-stat-value" id="displayCarga">0</div><div class="big-stat-label">Carga Máx</div></div>
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayDeslocamento">0</div><div class="big-stat-label">Deslocamento Blocos</div></div>
                 </div>
             </div>
 
@@ -257,6 +282,15 @@
                 <button class="add-btn" onclick="adicionarItem()">ADICIONAR ITEM</button>
             </div>
             <ul id="inventoryList" class="entry-list"></ul>
+             <div class="panel">
+                <h2>
+                    Lista de habs Padrão
+                   
+                </h2>
+                
+                <ul id="habList" class="entry-list"></ul>
+                <div id="habsContainer" class="habs-container"></div>
+            </div>
         </div>
 
         <button class="download-btn" onclick="baixarFicha()">💾 BAIXAR FICHA (.TXT)</button>
@@ -279,12 +313,35 @@
             { nome: "Sobrevivência", attr: "INT" }, { nome: "Tática", attr: "INT" },
             { nome: "Tecnologia", attr: "INT" }, { nome: "Vontade", attr: "PRE" }
         ];
+        const habsPadraoList = [
+            {nome:"Empenho",gasto:"1PE",efeito:"Ganha +5 em um teste de uma pericia treinada"},
+            {nome:"Mira de Elite",gasto:"2PE e ação de movimento/reação",efeito:"Ganha +10 no acerto em pontaria e ganha 1d6 a mais de dano"},
+            {nome:"Corredor Nato",gasto:"1PE",efeito:"Se desloca 3 blocos a mais na ação de movimento"},
+            {nome:"Gladiador",gasto:"2PE",efeito:"Ganha +10 no acerto em luta e pode derrubar o alvo dt 15 reflexo"},
+            {nome:"Perito",gasto:"2PE",efeito:"Ganha +10 em um teste de uma pericia treinada"},
+            {nome:"Tiro Furtivo",gasto:"Nenhum",efeito:"Causa 2d8 a mais de dano em um disparo ao estar furtivo"},
+            {nome:"Ecletico",gasto:"2PE",efeito:"Ganha +5 em um teste relacionado a intelecto ou presença"},
+            {nome:"Ataque Frenético",gasto:"3PE",efeito:"Ganha 1 ataque adicional naquela rodada"},
+            {nome:"Golpe Pesado",gasto:"2PE",efeito:"Causa +2d6 de dano em um golpe corpo a corpo (stacka até 2x)"},
+            {nome:"Lutador Nato",gasto:"Nenhum",efeito:"Seus golpes padrão causam 1d8+atributo de dano podendo ser letais, e agora o critico deles é 19/20"},
+            {nome:"Soco Pesado",gasto:"3PE",efeito:"Ataca com um poderoso soco causando 3d8+força em dano"}, 
+            {nome:"Bloqueio Pesado",gasto:"2PE",efeito:"Ao bloquear alem de usar luta como rd, usa fortitude tambem"},
+            {nome:"Esquiva Aprimorada",gasto:"2PE",efeito:"Ao esquivar ganha +10 na soma"},
+            {nome:"Casca Grossa",gasto:"Nenhum",efeito:"Sua pele é naturalmente grossa e seu corpo resistente, tem 5 de rd natural contra impacto balistico e cortante (requer 3 de vigor ou mais)"},
+            {nome:"Lingua de prata",gasto:"Nenhum",efeito:"Tem +5 em testes de diplomacia e enganação, pode gastar 1 PE e ter +5 no teste"},
+            {nome:"Contra-ataque efetivo",gasto:"2PE",efeito:"Causa +1d8 de dano e tem +8 no acerto do contraataque"},
+            {nome:"Assasinato",gasto:"2PE",efeito:"Aumenta a margem de critico em 5, e causa 1d6 a mais de dano em um ataque"},
+            {nome:"Tiro sequencial",gasto:"1PE",efeito:"Ataca novamente com uma arma leve (max:1x rodada)"},
+            {nome:"Tiro brutal",gasto:"3PE",efeito:"Em um disparo, aumenta a margem de critico em 5 e causa +2d6 de dano"},
+           
+        ]
 
         let inventario = [];
         let habilidades = [];
 
         window.onload = function() {
             gerarListaPericias();
+            gerarListaHabs();
             calcularTudo();
         };
 
@@ -304,6 +361,36 @@
                 container.appendChild(div);
             });
         }
+function gerarListaHabs() {
+    const container2 = document.getElementById('habsContainer');
+    container2.innerHTML = "";
+    habsPadraoList.forEach(hab => {
+        const div2 = document.createElement("div");
+        div2.className = "habs-row";
+        // Adicionamos estilo para parecer clicável e chamamos a nova função
+        div2.style.cursor = "pointer";
+        div2.onclick = () => sugerirHabilidade(hab.nome, hab.gasto, hab.efeito);
+        
+        div2.innerHTML = `
+            <div>
+                <strong class="skill-name">${hab.nome}</strong> 
+                <span style="font-size: 0.8em; color: #888;">(${hab.gasto})</span><br>
+                <small>${hab.efeito}</small>
+            </div>`;
+        container2.appendChild(div2);
+    });
+}
+function sugerirHabilidade(nome, gasto, efeito) {
+    // 1. Preenche os campos do formulário de Habilidades
+    document.getElementById('newHabName').value = nome;
+    document.getElementById('newHabDesc').value = `Gasto: ${gasto} | Efeito: ${efeito}`;
+
+    // 2. Chama a função que você já tem para adicionar na lista
+    adicionarHabilidade();
+    
+    // Opcional: Feedback visual ou scroll para cima
+    console.log("Habilidade " + nome + " adicionada!");
+}
 
         function calcularTudo() {
             const rawExp = parseInt(document.getElementById('exp').value) || 5;
@@ -314,6 +401,13 @@
             const vigor = parseInt(document.getElementById('attrVigor').value) || 0;
             const presenca = parseInt(document.getElementById('attrPresenca').value) || 0;
             const intelecto = parseInt(document.getElementById('attrIntelecto').value) || 0;
+            const valPercepcao = parseInt(document.getElementById('skill_Percepção').value) || 0;
+            const valIntuicao = parseInt(document.getElementById('skill_Intuição').value) || 0;
+            const valVontade = parseInt(document.getElementById('skill_Vontade').value) || 0;
+            const bonusPercepcao = Math.floor(valPercepcao / 5) * 2;
+            const bonusVontade = Math.floor(valVontade/ 5) * 2;
+            const defesaTotal = 10 + agilidade + bonusPercepcao
+            document.getElementById('displayDefesa').innerText = defesaTotal;
 
             const pontosAttrBase = 9; 
             // ALTERAÇÃO AQUI: Agora divide por 10 em vez de 5
@@ -326,10 +420,14 @@
             // --- CÁLCULO DE PV (VITALIDADE) ---
             // Regra: Base 10 + 3x Vigor (ALTERADO) + 1 por EXP efetiva + 1 a cada 5 EXP efetiva + FORTITUDE
             const pvBase = 10;
-            // ALTERAÇÃO AQUI: Vigor multiplica por 3
             const pvVigor = vigor * 3;
             const pvExpSimples = expEfetiva;
             const pvExpMilestone = Math.floor(expEfetiva / 5);
+            const blocosAndados = agilidade === 0 ? 1 : agilidade * 3;
+            const displayDeslocamento = document.getElementById('displayDeslocamento');
+            if (displayDeslocamento) {
+                displayDeslocamento.innerText = blocosAndados;
+            }
             
             // Pega o valor da perícia Fortitude
             const skillFortitude = document.getElementById('skill_Fortitude');
@@ -337,10 +435,7 @@
             
             const pvTotal = pvBase + pvVigor + pvExpSimples + pvExpMilestone + valFortitude;
             document.getElementById('displayPV').innerText = pvTotal;
-
-            // --- OUTROS STATUS ---
-            document.getElementById('displayDefesa').innerText = 10 + agilidade;
-            document.getElementById('displayPE').innerText =(forca + presenca + vigor )*2+ Math.floor(expEfetiva / 3);
+            document.getElementById('displayPE').innerText =(forca + presenca + vigor )*2+ Math.floor(expEfetiva / 3)+ bonusVontade;
 
             // --- CARGA ---
             const skillAtletismo = document.getElementById('skill_Atletismo');
@@ -383,40 +478,73 @@
             if (atual > maximo) el.innerText += " (!)";
         }
 
-        // --- HABILIDADES ---
-        function adicionarHabilidade() {
-            const nome = document.getElementById('newHabName').value;
-            const desc = document.getElementById('newHabDesc').value;
-            if(!nome) return;
-            habilidades.push({ nome, desc });
-            document.getElementById('newHabName').value = '';
-            document.getElementById('newHabDesc').value = '';
-            renderizarHabilidades();
-            calcularTudo();
-        }
+       function adicionarHabilidade() {
+    const nome = document.getElementById('newHabName').value;
+    const desc = document.getElementById('newHabDesc').value;
 
-        function removerHabilidade(index) {
-            habilidades.splice(index, 1);
-            renderizarHabilidades();
-            calcularTudo();
-        }
+    if (nome === "") {
+        alert("Digite um nome para a habilidade!");
+        return;
+    }
 
-        function renderizarHabilidades() {
-            const lista = document.getElementById('habList');
-            lista.innerHTML = '';
-            habilidades.forEach((hab, index) => {
-                const li = document.createElement('li');
-                li.className = 'entry-item';
-                li.innerHTML = `
-                    <div class="entry-header">
-                        <span class="entry-name">${hab.nome}</span>
-                        <button class="remove-btn" onclick="removerHabilidade(${index})">X</button>
-                    </div>
-                    <span class="entry-desc">${hab.desc}</span>
-                `;
-                lista.appendChild(li);
-            });
-        }
+    // Adiciona ao array de dados
+    habilidades.push({ nome, desc });
+
+    // Atualiza a visualização na tela
+    renderizarHabilidades();
+
+    // Limpa os campos para a próxima
+    document.getElementById('newHabName').value = "";
+    document.getElementById('newHabDesc').value = "";
+    
+    // Atualiza o contador (Ex: Habs: 1/2)
+    atualizarTrackers();
+}
+
+function renderizarHabilidades() {
+    const lista = document.getElementById('habList');
+    lista.innerHTML = "";
+    habilidades.forEach((hab, index) => {
+        const li = document.createElement('li');
+        li.className = 'entry-item';
+        li.innerHTML = `
+            <div style="flex-grow:1">
+                <strong>${hab.nome}</strong><br>
+                <small>${hab.desc}</small>
+            </div>
+            <button onclick="removerHabilidade(${index})" style="background:transparent; border:none; color:red; cursor:pointer;">✖</button>
+        `;
+        lista.appendChild(li);
+    });
+}
+
+function removerHabilidade(index) {
+    habilidades.splice(index, 1);
+    renderizarHabilidades();
+    atualizarTrackers();
+}
+
+function atualizarTrackers() {
+    // 1. Pega o valor de EXP para definir o máximo (Ex: 10 EXP / 5 = 2 slots)
+    const rawExp = parseInt(document.getElementById('exp').value) || 5;
+    const limiteHabs = Math.floor(rawExp / 5); 
+    
+    const totalHabs = habilidades.length;
+    const tracker = document.getElementById('habTracker');
+
+    // 2. Atualiza o texto: "Habs: Atual/Máximo"
+    tracker.innerText = `Habs: ${totalHabs}/${limiteHabs}`;
+
+    // 3. Lógica da cor (Vermelho se passar do limite)
+    if (totalHabs > limiteHabs) {
+        tracker.style.backgroundColor = "#ff4444"; // Fundo vermelho
+        tracker.style.color = "white";
+    } else {
+        tracker.style.backgroundColor = "#444"; // Cor padrão (cinza escuro)
+        tracker.style.color = "#00ff00"; // Texto verde ou padrão
+    }
+}
+
 
         // --- ITENS ---
         function adicionarItem() {
