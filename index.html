@@ -4,253 +4,664 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sombra do Condor - Criador de Fichas</title>
-    <link rel="shortcut icon" href="sombra do condor.png" type="image/x-icon">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
         :root {
-            --bg-color: #121214;
-            --panel-color: #202024;
+            --bg-color: #0a0a0f;
+            --bg-gradient: linear-gradient(135deg, #0a0a0f 0%, #121218 100%);
+            --panel-color: #1a1a24;
             --accent-color: #8257e6;
+            --accent-hover: #9d7bef;
+            --accent-glow: rgba(130, 87, 230, 0.4);
             --text-color: #e1e1e6;
-            --highlight: #29292e;
+            --text-muted: #a8a8b3;
+            --highlight: #252530;
             --danger: #e83f5b;
             --success: #04d361;
+            --warning: #fba94c;
+            --border-color: #2d2d3a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Roboto', 'Segoe UI', sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
             color: var(--text-color);
-            margin: 0;
             padding: 20px;
-            display: flex;
-            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(130, 87, 230, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(130, 87, 230, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
+            margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr 1.2fr 1fr;
-            gap: 20px;
+            gap: 24px;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .main-title {
             grid-column: 1 / -1;
             text-align: center;
-            font-size: 2.5rem;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
             color: var(--accent-color);
             text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 10px;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            padding: 20px;
+            position: relative;
+            text-shadow: 0 0 30px var(--accent-glow);
+            animation: glow 3s ease-in-out infinite;
         }
 
-        .panel {
-            background-color: var(--panel-color);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #323238;
-            height: fit-content;
-            margin-bottom: 20px;
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px var(--accent-glow); }
+            50% { text-shadow: 0 0 40px var(--accent-glow), 0 0 60px var(--accent-glow); }
         }
-        .panel-lateral {
-            background-color: var(--panel-color);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #323238;
-            height: fit-content;
-            margin-bottom: 20px;
+
+        .main-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            animation: slideWidth 2s ease-in-out infinite;
+        }
+
+        @keyframes slideWidth {
+            0%, 100% { width: 200px; }
+            50% { width: 300px; }
+        }
+
+        .panel, .panel-lateral {
+            background: rgba(26, 26, 36, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideUp 0.5s ease-out backwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .panel:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(130, 87, 230, 0.2);
+            border-color: var(--accent-color);
         }
 
         h2 {
             color: var(--accent-color);
-            margin-top: 0;
-            font-size: 1.2rem;
-            border-bottom: 1px solid #444;
-            padding-bottom: 8px;
-            margin-bottom: 15px;
+            margin: 0 0 20px 0;
+            font-size: 1.3rem;
+            font-weight: 700;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+            position: relative;
+        }
+
+        h2::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-glow);
         }
 
         .tracker-badge {
-            font-size: 0.8rem;
-            background: #000;
-            padding: 2px 8px;
-            border-radius: 10px;
-            border: 1px solid #555;
-            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+            animation: pulse 2s ease-in-out infinite;
         }
-        .tracker-badge.error { border-color: var(--danger); color: var(--danger); }
-        .tracker-badge.ok { border-color: var(--success); color: var(--success); }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .tracker-badge.error { 
+            border-color: var(--danger); 
+            color: var(--danger); 
+            background: rgba(232, 63, 91, 0.1);
+            box-shadow: 0 0 15px rgba(232, 63, 91, 0.3);
+        }
+        
+        .tracker-badge.ok { 
+            border-color: var(--success); 
+            color: var(--success);
+            background: rgba(4, 211, 97, 0.1);
+        }
 
         input[type="number"], input[type="text"], textarea {
-            background: var(--bg-color);
-            border: 1px solid #444;
-            color: white;
-            padding: 8px;
-            border-radius: 4px;
+            background: rgba(10, 10, 15, 0.8);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 12px;
+            border-radius: 8px;
             font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+            width: 100%;
         }
 
-        textarea { font-family: inherit; }
-        input[type="number"] { text-align: center; font-weight: bold; }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(130, 87, 230, 0.1);
+            transform: translateY(-1px);
+        }
 
-        .skills-container {
+        input[type="number"] { 
+            text-align: center; 
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .skills-container, .habs-container {
             max-height: 700px;
             overflow-y: auto;
-            padding-right: 5px;
+            padding-right: 8px;
         }
-        .skills-container::-webkit-scrollbar { width: 6px; }
-        .skills-container::-webkit-scrollbar-thumb { background-color: var(--accent-color); border-radius: 3px; }
 
-        .skill-row {
+        .skills-container::-webkit-scrollbar, .habs-container::-webkit-scrollbar { 
+            width: 8px; 
+        }
+
+        .skills-container::-webkit-scrollbar-track, .habs-container::-webkit-scrollbar-track {
+            background: var(--highlight);
+            border-radius: 10px;
+        }
+
+        .skills-container::-webkit-scrollbar-thumb, .habs-container::-webkit-scrollbar-thumb { 
+            background: var(--accent-color);
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .skills-container::-webkit-scrollbar-thumb:hover, 
+        .habs-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-hover);
+        }
+
+        .skill-row, .habs-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.02);
-            padding: 5px 8px;
+            margin-bottom: 10px;
+            background: rgba(37, 37, 48, 0.5);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .skill-row:hover, .habs-row:hover {
+            background: rgba(130, 87, 230, 0.1);
+            border-color: var(--accent-color);
+            transform: translateX(4px);
+        }
+
+        .skill-name { 
+            font-size: 0.95rem; 
+            font-weight: 500;
+        }
+
+        .skill-attr { 
+            font-size: 0.7rem; 
+            color: var(--text-muted); 
+            margin-left: 8px; 
+            text-transform: uppercase;
+            background: rgba(130, 87, 230, 0.2);
+            padding: 2px 6px;
             border-radius: 4px;
         }
-        .habs-container{
-            max-height: 700px;
-            overflow-y: auto;
-            padding-left: 5px;
+
+        .skill-input { 
+            width: 60px; 
+            margin-left: 10px;
+            padding: 6px;
         }
-        .habs-container::-webkit-scrollbar { width: 6px; }
-        .habs-container::-webkit-scrollbar-thumb { background-color: var(--accent-color); border-radius: 3px; }
-        .habs-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.02);
-            padding: 5px 8px;
-            border-radius: 4px;
+
+        .skill-input:invalid { 
+            border-color: var(--danger); 
+            background-color: rgba(232, 63, 91, 0.1);
+            animation: shake 0.5s;
         }
-        .skill-name { font-size: 0.9rem; }
-        .skill-attr { font-size: 0.7rem; color: #888; margin-left: 5px; text-transform: uppercase; }
-        .skill-input { width: 45px; margin-left: 10px; }
-        .skill-input:invalid { border-color: var(--danger); background-color: rgba(232, 63, 91, 0.1); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
 
         .stat-block {
             background: var(--highlight);
-            padding: 10px 15px;
-            border-radius: 6px;
-            margin-bottom: 10px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
         }
-        .stat-label { font-weight: bold; font-size: 1rem; }
+
+        .stat-block:hover {
+            border-color: var(--accent-color);
+            background: rgba(130, 87, 230, 0.05);
+        }
+
+        .stat-label { 
+            font-weight: 600; 
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
 
         .big-stat-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 24px;
         }
+
         .big-stat-box {
-            background: #000;
-            padding: 15px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(130, 87, 230, 0.1) 100%);
+            padding: 20px;
+            border-radius: 12px;
             text-align: center;
-            border: 1px solid var(--accent-color);
+            border: 2px solid var(--accent-color);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
-        .big-stat-value { font-size: 1.8rem; font-weight: bold; }
-        .big-stat-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
+
+        .big-stat-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(130, 87, 230, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+        }
+
+        .big-stat-box:hover::before {
+            left: 100%;
+        }
+
+        .big-stat-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(130, 87, 230, 0.4);
+        }
+
+        .big-stat-value { 
+            font-size: 2rem; 
+            font-weight: 800;
+            color: var(--accent-color);
+            text-shadow: 0 0 20px var(--accent-glow);
+            position: relative;
+            z-index: 1;
+        }
+
+        .big-stat-label { 
+            font-size: 0.7rem; 
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
 
         .entry-form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-            background: var(--highlight);
-            padding: 10px;
+            gap: 12px;
+            margin-bottom: 20px;
+            background: rgba(37, 37, 48, 0.5);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .entry-list { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+        }
+
+        .entry-item {
+            background: rgba(37, 37, 48, 0.6);
+            margin-bottom: 12px;
+            padding: 16px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-color);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .entry-item:hover {
+            background: rgba(130, 87, 230, 0.1);
+            border-color: var(--accent-color);
+            transform: translateX(8px);
+        }
+
+        .entry-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 8px; 
+        }
+
+        .entry-name { 
+            font-weight: 700; 
+            color: white;
+            font-size: 1.05rem;
+        }
+
+        .entry-meta { 
+            color: var(--text-muted); 
+            font-size: 0.85rem; 
+            margin-right: 12px;
+            background: rgba(130, 87, 230, 0.2);
+            padding: 4px 10px;
             border-radius: 6px;
         }
-        .entry-list { list-style: none; padding: 0; margin: 0; }
-        .entry-item {
-            background: rgba(255,255,255,0.05);
-            margin-bottom: 8px;
-            padding: 10px;
-            border-radius: 4px;
-            border-left: 3px solid var(--accent-color);
-        }
-        .entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .entry-name { font-weight: bold; color: white; }
-        .entry-meta { color: #aaa; font-size: 0.85rem; margin-right: 10px; }
-        .entry-desc { font-size: 0.85rem; color: #bbb; display: block; word-wrap: break-word; margin-top: 4px;}
 
-        button { cursor: pointer; border-radius: 4px; font-weight: bold; border: none; }
-        button.add-btn { background-color: var(--accent-color); color: white; padding: 10px; width: 100%; }
-        button.remove-btn { background: var(--danger); color: white; padding: 2px 6px; font-size: 0.8rem; }
+        .entry-desc { 
+            font-size: 0.9rem; 
+            color: var(--text-muted);
+            line-height: 1.6;
+            display: block; 
+            word-wrap: break-word; 
+            margin-top: 6px;
+        }
+
+        button { 
+            cursor: pointer; 
+            border-radius: 10px; 
+            font-weight: 700; 
+            border: none;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button.add-btn { 
+            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+            color: white; 
+            padding: 14px; 
+            width: 100%;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(130, 87, 230, 0.3);
+        }
+
+        button.add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(130, 87, 230, 0.5);
+        }
+
+        button.remove-btn { 
+            background: var(--danger); 
+            color: white; 
+            padding: 6px 12px; 
+            font-size: 0.75rem;
+            border-radius: 6px;
+        }
+
+        button.remove-btn:hover {
+            background: #ff5570;
+            transform: scale(1.1);
+        }
         
         button.download-btn {
-            background-color: var(--success); color: #000;
-            padding: 15px; width: 100%; font-size: 1.1rem;
-            margin-top: 20px; grid-column: 1 / -1;
-            box-shadow: 0 0 10px rgba(4, 211, 97, 0.3);
+            background: linear-gradient(135deg, var(--success) 0%, #03bb56 100%);
+            color: white;
+            padding: 20px; 
+            width: 100%; 
+            font-size: 1.2rem;
+            margin-top: 20px; 
+            grid-column: 1 / -1;
+            box-shadow: 0 8px 30px rgba(4, 211, 97, 0.4);
+            animation: downloadPulse 2s ease-in-out infinite;
         }
-        button.download-btn:hover { background-color: #03bb56; }
 
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+        @keyframes downloadPulse {
+            0%, 100% { box-shadow: 0 8px 30px rgba(4, 211, 97, 0.4); }
+            50% { box-shadow: 0 12px 40px rgba(4, 211, 97, 0.6); }
+        }
+
+        button.download-btn:hover { 
+            background: linear-gradient(135deg, #03bb56 0%, var(--success) 100%);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 50px rgba(4, 211, 97, 0.6);
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: -10px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: rgba(130, 87, 230, 0.05);
+            border-radius: 6px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        @media (max-width: 1200px) { 
+            .container { 
+                grid-template-columns: 1fr 1fr; 
+            }
+            .panel:nth-child(2) {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 768px) { 
+            .container { 
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            body {
+                padding: 12px;
+            }
+
+            .panel, .panel-lateral {
+                padding: 16px;
+            }
+
+            .main-title {
+                font-size: 1.8rem;
+                letter-spacing: 2px;
+                margin-bottom: 20px;
+            }
+
+            .big-stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="main-title">Sombra do Condor</div>
+        <div class="main-title">⚔️ Sombra do Condor ⚔️</div>
 
         <div class="panel">
             <h2>
                 Perícias 
                 <span id="skillTracker" class="tracker-badge">Slots: 0/2</span>
             </h2>
-            <p style="font-size:0.75rem; color:#888; margin-top:-10px;">
-                Base: 2 | +2x por INT | +1 a cada 5 Exp<br>
-                Máx Nível: +10 (<30 Exp) ou +20 (30+ Exp)
+            <p class="info-text">
+                📊 Base: 2 | +2× por INT | +1 a cada 5 Exp<br>
+                🎯 Máx Nível: +10 (<30 Exp) ou +20 (30+ Exp)
             </p>
             <div id="skillsContainer" class="skills-container"></div>
         </div>
 
         <div>
-            
             <div class="panel">
                 <h2>
                     Atributos
                     <span id="attrTracker" class="tracker-badge">Pontos: 0/9</span>
                 </h2>
                 
-                <div style="margin-bottom: 10px;">
-                    <label style="display:block; font-size:0.8rem; color:#aaa;">Nome / Codinome</label>
-                    <input type="text" id="charName" style="width: 96%;" placeholder="Ex: Kaua Silva (O monstro)">
+                <div style="margin-bottom: 16px;">
+                    <label>👤 Nome / Codinome</label>
+                    <input type="text" id="charName" placeholder="Ex: Kaua Silva (O Monstro)">
                 </div>
                 
-                <div style="margin-bottom: 15px;">
-                    <label style="display:block; font-size:0.8rem; color:#aaa;">Descrição Física / Idade</label>
-                    <textarea id="charDesc" rows="2" style="width: 96%;" placeholder="Ex: Um jovem de 26 anos, 1.77 85 kg corpo musculoso"></textarea>
+                <div style="margin-bottom: 20px;">
+                    <label>📝 Descrição Física / Idade</label>
+                    <textarea id="charDesc" rows="2" placeholder="Ex: Jovem de 26 anos, 1.77m, 85kg, corpo musculoso"></textarea>
                 </div>
 
-                <div class="stat-block" style="background: rgba(130, 87, 230, 0.1); border: 1px solid var(--accent-color);">
-                    <span class="stat-label">EXPERIÊNCIA (EXP)</span>
+                <div class="stat-block" style="background: rgba(130, 87, 230, 0.15); border: 2px solid var(--accent-color);">
+                    <span class="stat-label">⭐ EXPERIÊNCIA (EXP)</span>
                     <input type="number" id="exp" value="5" min="5" onchange="calcularTudo()">
                 </div>
 
-                <div class="stat-block"><span class="stat-label">FORÇA</span><input type="number" id="attrForca" value="1" min="0" onchange="calcularTudo()"></div>
-                <div class="stat-block"><span class="stat-label">AGILIDADE</span><input type="number" id="attrAgilidade" value="1" min="0" onchange="calcularTudo()"></div>
-                <div class="stat-block"><span class="stat-label">VIGOR</span><input type="number" id="attrVigor" value="1" min="0" onchange="calcularTudo()"></div>
-                <div class="stat-block"><span class="stat-label">PRESENÇA</span><input type="number" id="attrPresenca" value="1" min="0" onchange="calcularTudo()"></div>
-                <div class="stat-block"><span class="stat-label">INTELECTO</span><input type="number" id="attrIntelecto" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">💪 FORÇA</span><input type="number" id="attrForca" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">⚡ AGILIDADE</span><input type="number" id="attrAgilidade" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">🛡️ VIGOR</span><input type="number" id="attrVigor" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">👑 PRESENÇA</span><input type="number" id="attrPresenca" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">🧠 INTELECTO</span><input type="number" id="attrIntelecto" value="1" min="0" onchange="calcularTudo()"></div>
 
                 <div class="big-stat-grid">
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayPV">10</div><div class="big-stat-label">Vitalidade</div></div>
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayDefesa">11</div><div class="big-stat-label">Defesa</div></div>
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayPE">0</div><div class="big-stat-label">P. Esforço</div></div>
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayCarga">0</div><div class="big-stat-label">Carga Máx</div></div>
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayDeslocamento">0</div><div class="big-stat-label">Deslocamento Blocos</div></div>
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayPV">10</div><div class="big-stat-label">❤️ Vitalidade</div></div>
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayDefesa">11</div><div class="big-stat-label">🛡️ Defesa</div></div>
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayPE">0</div><div class="big-stat-label">⚡ P. Esforço</div></div>
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayCarga">0</div><div class="big-stat-label">📦 Carga Máx</div></div>
+                    <div class="big-stat-box"><div class="big-stat-value" id="displayDeslocamento">0</div><div class="big-stat-label">🏃 Deslocamento</div></div>
                 </div>
             </div>
 
@@ -260,35 +671,34 @@
                     <span id="habTracker" class="tracker-badge">Habs: 0/2</span>
                 </h2>
                 <div class="entry-form">
-                    <input type="text" id="newHabName" placeholder="Nome (Ex: Ippon Seoi Nage)" style="width: 93%;">
-                    <textarea id="newHabDesc" placeholder="Descrição (Efeito, Custo...)" rows="3" style="width: 93%; resize: vertical;"></textarea>
-                    <button class="add-btn" onclick="adicionarHabilidade()">ADICIONAR HABILIDADE</button>
+                    <input type="text" id="newHabName" placeholder="🎯 Nome da Habilidade">
+                    <textarea id="newHabDesc" placeholder="📋 Descrição (Efeito, Custo...)" rows="3" style="resize: vertical;"></textarea>
+                    <button class="add-btn" onclick="adicionarHabilidade()">✨ ADICIONAR HABILIDADE</button>
                 </div>
                 <ul id="habList" class="entry-list"></ul>
             </div>
         </div>
 
-        <div class="panel">
-            <h2>
-                Inventário
-                <span id="loadTracker" class="tracker-badge">Peso: 0</span>
-            </h2>
-            <div class="entry-form">
-                <input type="text" id="newItemName" placeholder="Nome do Item" style="width: 93%;">
-                <div style="display:flex; gap:5px;">
-                    <input type="number" id="newItemWeight" placeholder="Peso" style="width: 70px;">
-                    <input type="text" id="newItemDesc" placeholder="Descrição / Dano" style="flex-grow:1;">
-                </div>
-                <button class="add-btn" onclick="adicionarItem()">ADICIONAR ITEM</button>
-            </div>
-            <ul id="inventoryList" class="entry-list"></ul>
-             <div class="panel">
+        <div>
+            <div class="panel">
                 <h2>
-                    Lista de habs Padrão
-                   
+                    Inventário
+                    <span id="loadTracker" class="tracker-badge">Peso: 0</span>
                 </h2>
-                
-                <ul id="habList" class="entry-list"></ul>
+                <div class="entry-form">
+                    <input type="text" id="newItemName" placeholder="🎒 Nome do Item">
+                    <div style="display:flex; gap:8px;">
+                        <input type="number" id="newItemWeight" placeholder="⚖️ Peso" style="width: 80px;">
+                        <input type="text" id="newItemDesc" placeholder="📝 Descrição / Dano" style="flex-grow:1;">
+                    </div>
+                    <button class="add-btn" onclick="adicionarItem()">➕ ADICIONAR ITEM</button>
+                </div>
+                <ul id="inventoryList" class="entry-list"></ul>
+            </div>
+
+            <div class="panel">
+                <h2>📚 Habilidades Padrão</h2>
+                <p class="info-text">💡 Clique em uma habilidade para adicioná-la automaticamente</p>
                 <div id="habsContainer" class="habs-container"></div>
             </div>
         </div>
@@ -313,6 +723,7 @@
             { nome: "Sobrevivência", attr: "INT" }, { nome: "Tática", attr: "INT" },
             { nome: "Tecnologia", attr: "INT" }, { nome: "Vontade", attr: "PRE" }
         ];
+
         const habsPadraoList = [
             {nome:"Empenho",gasto:"1PE",efeito:"Ganha +5 em um teste de uma pericia treinada"},
             {nome:"Mira de Elite",gasto:"2PE e ação de movimento/reação",efeito:"Ganha +10 no acerto em pontaria e ganha 1d6 a mais de dano"},
@@ -332,9 +743,8 @@
             {nome:"Contra-ataque efetivo",gasto:"2PE",efeito:"Causa +1d8 de dano e tem +8 no acerto do contraataque"},
             {nome:"Assasinato",gasto:"2PE",efeito:"Aumenta a margem de critico em 5, e causa 1d6 a mais de dano em um ataque"},
             {nome:"Tiro sequencial",gasto:"1PE",efeito:"Ataca novamente com uma arma leve (max:1x rodada)"},
-            {nome:"Tiro brutal",gasto:"3PE",efeito:"Em um disparo, aumenta a margem de critico em 5 e causa +2d6 de dano"},
-           
-        ]
+            {nome:"Tiro brutal",gasto:"3PE",efeito:"Em um disparo, aumenta a margem de critico em 5 e causa +2d6 de dano"}
+        ];
 
         let inventario = [];
         let habilidades = [];
@@ -348,49 +758,50 @@
         function gerarListaPericias() {
             const container = document.getElementById('skillsContainer');
             container.innerHTML = '';
-            periciasList.forEach(pericia => {
+            periciasList.forEach((pericia, index) => {
                 const inputId = pericia.nome === "Atletismo" ? "skill_Atletismo" : 
                                 pericia.nome === "Fortitude" ? "skill_Fortitude" : `skill_${pericia.nome}`;
                 
                 const div = document.createElement('div');
                 div.className = 'skill-row';
+                div.style.animationDelay = `${index * 0.02}s`;
                 div.innerHTML = `
-                    <div><span class="skill-name">${pericia.nome}</span> <span class="skill-attr">(${pericia.attr})</span></div>
+                    <div><span class="skill-name">${pericia.nome}</span> <span class="skill-attr">${pericia.attr}</span></div>
                     <input type="number" id="${inputId}" class="skill-input" value="0" min="0" step="5" onchange="calcularTudo()">
                 `;
                 container.appendChild(div);
             });
         }
-function gerarListaHabs() {
-    const container2 = document.getElementById('habsContainer');
-    container2.innerHTML = "";
-    habsPadraoList.forEach(hab => {
-        const div2 = document.createElement("div");
-        div2.className = "habs-row";
-        // Adicionamos estilo para parecer clicável e chamamos a nova função
-        div2.style.cursor = "pointer";
-        div2.onclick = () => sugerirHabilidade(hab.nome, hab.gasto, hab.efeito);
-        
-        div2.innerHTML = `
-            <div>
-                <strong class="skill-name">${hab.nome}</strong> 
-                <span style="font-size: 0.8em; color: #888;">(${hab.gasto})</span><br>
-                <small>${hab.efeito}</small>
-            </div>`;
-        container2.appendChild(div2);
-    });
-}
-function sugerirHabilidade(nome, gasto, efeito) {
-    // 1. Preenche os campos do formulário de Habilidades
-    document.getElementById('newHabName').value = nome;
-    document.getElementById('newHabDesc').value = `Gasto: ${gasto} | Efeito: ${efeito}`;
 
-    // 2. Chama a função que você já tem para adicionar na lista
-    adicionarHabilidade();
-    
-    // Opcional: Feedback visual ou scroll para cima
-    console.log("Habilidade " + nome + " adicionada!");
-}
+        function gerarListaHabs() {
+            const container2 = document.getElementById('habsContainer');
+            container2.innerHTML = "";
+            habsPadraoList.forEach((hab, index) => {
+                const div2 = document.createElement("div");
+                div2.className = "habs-row";
+                div2.style.animationDelay = `${index * 0.02}s`;
+                div2.onclick = () => sugerirHabilidade(hab.nome, hab.gasto, hab.efeito);
+                
+                div2.innerHTML = `
+                    <div style="width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <strong class="skill-name">${hab.nome}</strong> 
+                            <span style="font-size: 0.75rem; color: var(--accent-color); background: rgba(130, 87, 230, 0.2); padding: 2px 8px; border-radius: 4px;">${hab.gasto}</span>
+                        </div>
+                        <small style="color: var(--text-muted); line-height: 1.4;">${hab.efeito}</small>
+                    </div>`;
+                container2.appendChild(div2);
+            });
+        }
+
+        function sugerirHabilidade(nome, gasto, efeito) {
+            document.getElementById('newHabName').value = nome;
+            document.getElementById('newHabDesc').value = `Gasto: ${gasto} | Efeito: ${efeito}`;
+            adicionarHabilidade();
+            
+            const habSection = document.getElementById('newHabName').closest('.panel');
+            habSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
         function calcularTudo() {
             const rawExp = parseInt(document.getElementById('exp').value) || 5;
@@ -402,23 +813,19 @@ function sugerirHabilidade(nome, gasto, efeito) {
             const presenca = parseInt(document.getElementById('attrPresenca').value) || 0;
             const intelecto = parseInt(document.getElementById('attrIntelecto').value) || 0;
             const valPercepcao = parseInt(document.getElementById('skill_Percepção').value) || 0;
-            const valIntuicao = parseInt(document.getElementById('skill_Intuição').value) || 0;
             const valVontade = parseInt(document.getElementById('skill_Vontade').value) || 0;
             const bonusPercepcao = Math.floor(valPercepcao / 5) * 2;
-            const bonusVontade = Math.floor(valVontade/ 5) * 2;
-            const defesaTotal = 10 + agilidade + bonusPercepcao
+            const bonusVontade = Math.floor(valVontade / 5) * 2;
+            const defesaTotal = 10 + agilidade + bonusPercepcao;
             document.getElementById('displayDefesa').innerText = defesaTotal;
 
             const pontosAttrBase = 9; 
-            // ALTERAÇÃO AQUI: Agora divide por 10 em vez de 5
             const pontosAttrBonus = Math.floor(expEfetiva / 10);
             const maxPontosAttr = pontosAttrBase + pontosAttrBonus;
             const pontosGastos = forca + agilidade + vigor + presenca + intelecto;
             
             atualizarTracker('attrTracker', pontosGastos, maxPontosAttr, "Pontos");
 
-            // --- CÁLCULO DE PV (VITALIDADE) ---
-            // Regra: Base 10 + 3x Vigor (ALTERADO) + 1 por EXP efetiva + 1 a cada 5 EXP efetiva + FORTITUDE
             const pvBase = 10;
             const pvVigor = vigor * 3;
             const pvExpSimples = expEfetiva;
@@ -429,22 +836,19 @@ function sugerirHabilidade(nome, gasto, efeito) {
                 displayDeslocamento.innerText = blocosAndados;
             }
             
-            // Pega o valor da perícia Fortitude
             const skillFortitude = document.getElementById('skill_Fortitude');
             const valFortitude = skillFortitude ? (parseInt(skillFortitude.value) || 0) : 0;
             
             const pvTotal = pvBase + pvVigor + pvExpSimples + pvExpMilestone + valFortitude;
             document.getElementById('displayPV').innerText = pvTotal;
-            document.getElementById('displayPE').innerText =(forca + presenca + vigor )*2+ Math.floor(expEfetiva / 3)+ bonusVontade;
+            document.getElementById('displayPE').innerText = (forca + presenca + vigor) * 2 + Math.floor(expEfetiva / 3) + bonusVontade;
 
-            // --- CARGA ---
             const skillAtletismo = document.getElementById('skill_Atletismo');
             const valAtletismo = skillAtletismo ? (parseInt(skillAtletismo.value) || 0) : 0;
             const cargaTotal = 5 + (forca * 2) + (Math.floor(valAtletismo / 5) * 2);
             document.getElementById('displayCarga').innerText = cargaTotal;
             atualizarPesoInventario(cargaTotal);
 
-            // --- TRACKERS DE PERÍCIA ---
             const maxSkillValue = (rawExp >= 30) ? 20 : 10;
             const slotsBase = 2;
             const slotsInt = intelecto * 2;
@@ -459,14 +863,13 @@ function sugerirHabilidade(nome, gasto, efeito) {
                     input.style.borderColor = "var(--danger)";
                     input.style.color = "var(--danger)";
                 } else {
-                    input.style.borderColor = "#444";
+                    input.style.borderColor = "var(--border-color)";
                     input.style.color = "white";
                 }
                 slotsGastos += Math.floor(val / 5);
             });
             atualizarTracker('skillTracker', slotsGastos, maxSlots, "Slots");
 
-            // --- TRACKER HABILIDADE ---
             const habsMax = 2 + intelecto + Math.floor(expEfetiva / 5);
             atualizarTracker('habTracker', habilidades.length, habsMax, "Habs");
         }
@@ -475,83 +878,58 @@ function sugerirHabilidade(nome, gasto, efeito) {
             const el = document.getElementById(id);
             el.innerText = `${label}: ${atual}/${maximo}`;
             el.className = (atual > maximo) ? 'tracker-badge error' : 'tracker-badge ok';
-            if (atual > maximo) el.innerText += " (!)";
+            if (atual > maximo) el.innerText += " ⚠️";
         }
 
-       function adicionarHabilidade() {
-    const nome = document.getElementById('newHabName').value;
-    const desc = document.getElementById('newHabDesc').value;
+        function adicionarHabilidade() {
+            const nome = document.getElementById('newHabName').value.trim();
+            const desc = document.getElementById('newHabDesc').value.trim();
 
-    if (nome === "") {
-        alert("Digite um nome para a habilidade!");
-        return;
-    }
+            if (nome === "") {
+                alert("⚠️ Digite um nome para a habilidade!");
+                return;
+            }
 
-    // Adiciona ao array de dados
-    habilidades.push({ nome, desc });
+            habilidades.push({ nome, desc });
+            renderizarHabilidades();
 
-    // Atualiza a visualização na tela
-    renderizarHabilidades();
+            document.getElementById('newHabName').value = "";
+            document.getElementById('newHabDesc').value = "";
+            
+            calcularTudo();
+        }
 
-    // Limpa os campos para a próxima
-    document.getElementById('newHabName').value = "";
-    document.getElementById('newHabDesc').value = "";
-    
-    // Atualiza o contador (Ex: Habs: 1/2)
-    atualizarTrackers();
-}
+        function renderizarHabilidades() {
+            const lista = document.getElementById('habList');
+            lista.innerHTML = "";
+            habilidades.forEach((hab, index) => {
+                const li = document.createElement('li');
+                li.className = 'entry-item';
+                li.innerHTML = `
+                    <div class="entry-header">
+                        <span class="entry-name">${hab.nome}</span>
+                        <button class="remove-btn" onclick="removerHabilidade(${index})">✖</button>
+                    </div>
+                    ${hab.desc ? `<span class="entry-desc">${hab.desc}</span>` : ''}
+                `;
+                lista.appendChild(li);
+            });
+        }
 
-function renderizarHabilidades() {
-    const lista = document.getElementById('habList');
-    lista.innerHTML = "";
-    habilidades.forEach((hab, index) => {
-        const li = document.createElement('li');
-        li.className = 'entry-item';
-        li.innerHTML = `
-            <div style="flex-grow:1">
-                <strong>${hab.nome}</strong><br>
-                <small>${hab.desc}</small>
-            </div>
-            <button onclick="removerHabilidade(${index})" style="background:transparent; border:none; color:red; cursor:pointer;">✖</button>
-        `;
-        lista.appendChild(li);
-    });
-}
+        function removerHabilidade(index) {
+            habilidades.splice(index, 1);
+            renderizarHabilidades();
+            calcularTudo();
+        }
 
-function removerHabilidade(index) {
-    habilidades.splice(index, 1);
-    renderizarHabilidades();
-    atualizarTrackers();
-}
-
-function atualizarTrackers() {
-    // 1. Pega o valor de EXP para definir o máximo (Ex: 10 EXP / 5 = 2 slots)
-    const rawExp = parseInt(document.getElementById('exp').value) || 5;
-    const limiteHabs = Math.floor(rawExp / 5); 
-    
-    const totalHabs = habilidades.length;
-    const tracker = document.getElementById('habTracker');
-
-    // 2. Atualiza o texto: "Habs: Atual/Máximo"
-    tracker.innerText = `Habs: ${totalHabs}/${limiteHabs}`;
-
-    // 3. Lógica da cor (Vermelho se passar do limite)
-    if (totalHabs > limiteHabs) {
-        tracker.style.backgroundColor = "#ff4444"; // Fundo vermelho
-        tracker.style.color = "white";
-    } else {
-        tracker.style.backgroundColor = "#444"; // Cor padrão (cinza escuro)
-        tracker.style.color = "#00ff00"; // Texto verde ou padrão
-    }
-}
-
-
-        // --- ITENS ---
         function adicionarItem() {
-            const nome = document.getElementById('newItemName').value;
+            const nome = document.getElementById('newItemName').value.trim();
             const peso = parseInt(document.getElementById('newItemWeight').value) || 0;
-            const desc = document.getElementById('newItemDesc').value;
-            if (!nome) return;
+            const desc = document.getElementById('newItemDesc').value.trim();
+            if (!nome) {
+                alert("⚠️ Digite um nome para o item!");
+                return;
+            }
             inventario.push({ nome, peso, desc });
             document.getElementById('newItemName').value = '';
             document.getElementById('newItemWeight').value = '';
@@ -577,10 +955,10 @@ function atualizarTrackers() {
                         <span class="entry-name">${item.nome}</span>
                         <div>
                             <span class="entry-meta">${item.peso}kg</span>
-                            <button class="remove-btn" onclick="removerItem(${index})">X</button>
+                            <button class="remove-btn" onclick="removerItem(${index})">✖</button>
                         </div>
                     </div>
-                    <span class="entry-desc">${item.desc || ""}</span>
+                    ${item.desc ? `<span class="entry-desc">${item.desc}</span>` : ''}
                 `;
                 lista.appendChild(li);
             });
@@ -594,63 +972,71 @@ function atualizarTrackers() {
             tracker.className = pesoTotal > cargaMax ? 'tracker-badge error' : 'tracker-badge ok';
         }
 
-        // --- GERAÇÃO DO ARQUIVO TXT NO FORMATO SOLICITADO ---
         function baixarFicha() {
-            const nome = document.getElementById('charName').value || "Sem Nome";
-            const descFisica = document.getElementById('charDesc').value || "";
-            const exp = document.getElementById('exp').value;
-            const pv = document.getElementById('displayPV').innerText;
-            const pe = document.getElementById('displayPE').innerText;
-            const def = document.getElementById('displayDefesa').innerText;
-            
-            const forca = document.getElementById('attrForca').value;
-            const agi = document.getElementById('attrAgilidade').value;
-            const vig = document.getElementById('attrVigor').value;
-            const pre = document.getElementById('attrPresenca').value;
-            const int = document.getElementById('attrIntelecto').value;
+            const btn = document.querySelector('.download-btn');
+            btn.innerHTML = '<span class="spinner"></span> GERANDO...';
+            btn.classList.add('loading');
 
-            // Construção exata do layout solicitado
-            let texto = `${nome}\n\n`;
-            if (descFisica) texto += `Descrição: ${descFisica}\n\n`;
-            
-            texto += `Exp:${exp}\n\n`;
-            texto += `Vitalidade: ${pv}\n`;
-            texto += `Força: ${forca}\n`;
-            texto += `Agilidade: ${agi}\n`;
-            texto += `Presença: ${pre}\n`;
-            texto += `Vigor: ${vig}\n`;
-            texto += `Intelecto: ${int}\n`;
-            texto += `Pontos de Esforço (PE): ${pe}\n\n`;
-            texto += `Defesa:${def}\n\n`;
+            setTimeout(() => {
+                const nome = document.getElementById('charName').value || "Sem Nome";
+                const descFisica = document.getElementById('charDesc').value || "";
+                const exp = document.getElementById('exp').value;
+                const pv = document.getElementById('displayPV').innerText;
+                const pe = document.getElementById('displayPE').innerText;
+                const def = document.getElementById('displayDefesa').innerText;
+                
+                const forca = document.getElementById('attrForca').value;
+                const agi = document.getElementById('attrAgilidade').value;
+                const vig = document.getElementById('attrVigor').value;
+                const pre = document.getElementById('attrPresenca').value;
+                const int = document.getElementById('attrIntelecto').value;
 
-            texto += `Itens\n\n`;
-            if (inventario.length === 0) texto += `(Nenhum item)\n`;
-            inventario.forEach(item => {
-                // Formato: Nome: Descrição
-                let descFormatada = item.desc ? `: ${item.desc}` : "";
-                texto += `${item.nome}${descFormatada}\n\n`;
-            });
+                let texto = `${nome}\n\n`;
+                if (descFisica) texto += `Descrição: ${descFisica}\n\n`;
+                
+                texto += `Exp:${exp}\n\n`;
+                texto += `Vitalidade: ${pv}\n`;
+                texto += `Força: ${forca}\n`;
+                texto += `Agilidade: ${agi}\n`;
+                texto += `Presença: ${pre}\n`;
+                texto += `Vigor: ${vig}\n`;
+                texto += `Intelecto: ${int}\n`;
+                texto += `Pontos de Esforço (PE): ${pe}\n\n`;
+                texto += `Defesa:${def}\n\n`;
 
-            texto += `Pericias: ____________________________________________\n`;
-            const inputs = document.querySelectorAll('.skill-input');
-            inputs.forEach(input => {
-                if(parseInt(input.value) > 0) {
-                    const nomeSkill = input.previousElementSibling.querySelector('.skill-name').innerText;
-                    texto += `${nomeSkill} +${input.value}\n`;
-                }
-            });
+                texto += `Itens\n\n`;
+                if (inventario.length === 0) texto += `(Nenhum item)\n`;
+                inventario.forEach(item => {
+                    let descFormatada = item.desc ? `: ${item.desc}` : "";
+                    texto += `${item.nome}${descFormatada}\n\n`;
+                });
 
-            texto += `\nHabilidades\n\n`;
-            habilidades.forEach(h => {
-                // Formato: Nome:Descrição
-                texto += `${h.nome}:${h.desc}\n\n`;
-            });
+                texto += `Pericias: ____________________________________________\n`;
+                const inputs = document.querySelectorAll('.skill-input');
+                inputs.forEach(input => {
+                    if(parseInt(input.value) > 0) {
+                        const nomeSkill = input.closest('.skill-row').querySelector('.skill-name').innerText;
+                        texto += `${nomeSkill} +${input.value}\n`;
+                    }
+                });
 
-            const blob = new Blob([texto], { type: "text/plain" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `Ficha_${nome.replace(/\s+/g, '_')}.txt`;
-            link.click();
+                texto += `\nHabilidades\n\n`;
+                habilidades.forEach(h => {
+                    texto += `${h.nome}:${h.desc}\n\n`;
+                });
+
+                const blob = new Blob([texto], { type: "text/plain" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `Ficha_${nome.replace(/\s+/g, '_')}.txt`;
+                link.click();
+
+                btn.innerHTML = '✅ FICHA BAIXADA!';
+                setTimeout(() => {
+                    btn.innerHTML = '💾 BAIXAR FICHA (.TXT)';
+                    btn.classList.remove('loading');
+                }, 2000);
+            }, 800);
         }
     </script>
 </body>
