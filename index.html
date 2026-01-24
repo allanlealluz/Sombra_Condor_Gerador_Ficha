@@ -4,23 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sombra do Condor - Criador de Fichas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
         :root {
-            --bg-color: #0a0a0f;
-            --bg-gradient: linear-gradient(135deg, #0a0a0f 0%, #121218 100%);
-            --panel-color: #1a1a24;
-            --accent-color: #8257e6;
+            --bg-dark: #0a0a0f;
+            --bg-panel: rgba(26, 26, 36, 0.7);
+            --accent: #8257e6;
             --accent-hover: #9d7bef;
             --accent-glow: rgba(130, 87, 230, 0.4);
-            --text-color: #e1e1e6;
+            --text: #e1e1e6;
             --text-muted: #a8a8b3;
             --highlight: #252530;
             --danger: #e83f5b;
             --success: #04d361;
-            --warning: #fba94c;
-            --border-color: #2d2d3a;
+            --border: #2d2d3a;
         }
 
         * {
@@ -30,39 +28,19 @@
         }
 
         body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            background: var(--bg-gradient);
-            background-attachment: fixed;
-            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #121218 100%) fixed;
+            color: var(--text);
             padding: 20px;
             min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(130, 87, 230, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(130, 87, 230, 0.08) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
         }
 
         .container {
-            width: 100%;
             max-width: 1400px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr 1.2fr 1fr;
             gap: 24px;
-            position: relative;
-            z-index: 1;
             animation: fadeIn 0.6s ease-out;
         }
 
@@ -71,70 +49,33 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .main-title {
+        .title {
             grid-column: 1 / -1;
             text-align: center;
             font-size: clamp(2rem, 5vw, 3rem);
             font-weight: 800;
-            color: var(--accent-color);
+            color: var(--accent);
             text-transform: uppercase;
             letter-spacing: 4px;
-            margin-bottom: 30px;
             padding: 20px;
-            position: relative;
             text-shadow: 0 0 30px var(--accent-glow);
             animation: glow 3s ease-in-out infinite;
         }
 
         @keyframes glow {
             0%, 100% { text-shadow: 0 0 20px var(--accent-glow); }
-            50% { text-shadow: 0 0 40px var(--accent-glow), 0 0 60px var(--accent-glow); }
+            50% { text-shadow: 0 0 40px var(--accent-glow); }
         }
 
-        .main-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
-            animation: slideWidth 2s ease-in-out infinite;
-        }
-
-        @keyframes slideWidth {
-            0%, 100% { width: 200px; }
-            50% { width: 300px; }
-        }
-
-        .panel, .panel-lateral {
-            background: rgba(26, 26, 36, 0.7);
+        .panel {
+            background: var(--bg-panel);
             backdrop-filter: blur(10px);
             padding: 24px;
             border-radius: 16px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             animation: slideUp 0.5s ease-out backwards;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .panel:hover::before {
-            opacity: 1;
         }
 
         @keyframes slideUp {
@@ -145,66 +86,47 @@
         .panel:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 48px rgba(130, 87, 230, 0.2);
-            border-color: var(--accent-color);
+            border-color: var(--accent);
         }
 
         h2 {
-            color: var(--accent-color);
-            margin: 0 0 20px 0;
+            color: var(--accent);
+            margin-bottom: 20px;
             font-size: 1.3rem;
             font-weight: 700;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding-bottom: 12px;
-            border-bottom: 2px solid var(--border-color);
-            position: relative;
+            border-bottom: 2px solid var(--border);
         }
 
-        h2::before {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 60px;
-            height: 2px;
-            background: var(--accent-color);
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        .tracker-badge {
+        .badge {
             font-size: 0.75rem;
             font-weight: 600;
             background: rgba(0, 0, 0, 0.5);
             padding: 6px 12px;
             border-radius: 20px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             transition: all 0.3s;
-            animation: pulse 2s ease-in-out infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .tracker-badge.error { 
-            border-color: var(--danger); 
-            color: var(--danger); 
+        .badge.error { 
+            border-color: var(--danger);
+            color: var(--danger);
             background: rgba(232, 63, 91, 0.1);
-            box-shadow: 0 0 15px rgba(232, 63, 91, 0.3);
         }
         
-        .tracker-badge.ok { 
-            border-color: var(--success); 
+        .badge.ok { 
+            border-color: var(--success);
             color: var(--success);
             background: rgba(4, 211, 97, 0.1);
         }
 
-        input[type="number"], input[type="text"], textarea {
+        input, textarea {
             background: rgba(10, 10, 15, 0.8);
-            border: 2px solid var(--border-color);
-            color: var(--text-color);
+            border: 2px solid var(--border);
+            color: var(--text);
             padding: 12px;
             border-radius: 8px;
             font-size: 1rem;
@@ -215,44 +137,33 @@
 
         input:focus, textarea:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(130, 87, 230, 0.1);
-            transform: translateY(-1px);
         }
 
         input[type="number"] { 
-            text-align: center; 
+            text-align: center;
             font-weight: 700;
             font-size: 1.1rem;
         }
 
-        .skills-container, .habs-container {
+        .scroll-container {
             max-height: 700px;
             overflow-y: auto;
             padding-right: 8px;
         }
 
-        .skills-container::-webkit-scrollbar, .habs-container::-webkit-scrollbar { 
-            width: 8px; 
-        }
-
-        .skills-container::-webkit-scrollbar-track, .habs-container::-webkit-scrollbar-track {
+        .scroll-container::-webkit-scrollbar { width: 8px; }
+        .scroll-container::-webkit-scrollbar-track {
             background: var(--highlight);
             border-radius: 10px;
         }
-
-        .skills-container::-webkit-scrollbar-thumb, .habs-container::-webkit-scrollbar-thumb { 
-            background: var(--accent-color);
+        .scroll-container::-webkit-scrollbar-thumb { 
+            background: var(--accent);
             border-radius: 10px;
-            transition: background 0.3s;
         }
 
-        .skills-container::-webkit-scrollbar-thumb:hover, 
-        .habs-container::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-hover);
-        }
-
-        .skill-row, .habs-row {
+        .row {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -262,24 +173,20 @@
             border-radius: 10px;
             border: 1px solid transparent;
             transition: all 0.3s;
-            cursor: pointer;
         }
 
-        .skill-row:hover, .habs-row:hover {
+        .row:hover {
             background: rgba(130, 87, 230, 0.1);
-            border-color: var(--accent-color);
+            border-color: var(--accent);
             transform: translateX(4px);
         }
 
-        .skill-name { 
-            font-size: 0.95rem; 
-            font-weight: 500;
-        }
+        .row.clickable { cursor: pointer; }
 
         .skill-attr { 
-            font-size: 0.7rem; 
-            color: var(--text-muted); 
-            margin-left: 8px; 
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-left: 8px;
             text-transform: uppercase;
             background: rgba(130, 87, 230, 0.2);
             padding: 2px 6px;
@@ -287,21 +194,9 @@
         }
 
         .skill-input { 
-            width: 60px; 
+            width: 60px;
             margin-left: 10px;
             padding: 6px;
-        }
-
-        .skill-input:invalid { 
-            border-color: var(--danger); 
-            background-color: rgba(232, 63, 91, 0.1);
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
         }
 
         .stat-block {
@@ -312,81 +207,64 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             transition: all 0.3s;
         }
 
         .stat-block:hover {
-            border-color: var(--accent-color);
+            border-color: var(--accent);
             background: rgba(130, 87, 230, 0.05);
         }
 
+        .stat-block.highlight {
+            background: rgba(130, 87, 230, 0.15);
+            border: 2px solid var(--accent);
+        }
+
         .stat-label { 
-            font-weight: 600; 
+            font-weight: 600;
             font-size: 0.95rem;
             letter-spacing: 0.5px;
         }
 
-        .big-stat-grid {
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
             margin-top: 24px;
         }
 
-        .big-stat-box {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(130, 87, 230, 0.1) 100%);
+        .stat-box {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(130, 87, 230, 0.1));
             padding: 20px;
             border-radius: 12px;
             text-align: center;
-            border: 2px solid var(--accent-color);
+            border: 2px solid var(--accent);
             transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
         }
 
-        .big-stat-box::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(130, 87, 230, 0.1), transparent);
-            transform: rotate(45deg);
-            transition: all 0.5s;
-        }
-
-        .big-stat-box:hover::before {
-            left: 100%;
-        }
-
-        .big-stat-box:hover {
+        .stat-box:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 30px rgba(130, 87, 230, 0.4);
+            box-shadow: 0 8px 30px var(--accent-glow);
         }
 
-        .big-stat-value { 
-            font-size: 2rem; 
+        .stat-value { 
+            font-size: 2rem;
             font-weight: 800;
-            color: var(--accent-color);
+            color: var(--accent);
             text-shadow: 0 0 20px var(--accent-glow);
-            position: relative;
-            z-index: 1;
         }
 
-        .big-stat-label { 
-            font-size: 0.7rem; 
+        .stat-name { 
+            font-size: 0.7rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 8px;
             font-weight: 600;
-            position: relative;
-            z-index: 1;
         }
 
-        .entry-form {
+        .form {
             display: flex;
             flex-direction: column;
             gap: 12px;
@@ -394,22 +272,21 @@
             background: rgba(37, 37, 48, 0.5);
             padding: 16px;
             border-radius: 12px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
         }
 
-        .entry-list { 
-            list-style: none; 
-            padding: 0; 
-            margin: 0; 
+        .list { 
+            list-style: none;
+            padding: 0;
         }
 
-        .entry-item {
+        .item {
             background: rgba(37, 37, 48, 0.6);
             margin-bottom: 12px;
             padding: 16px;
             border-radius: 10px;
-            border-left: 4px solid var(--accent-color);
-            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent);
+            border: 1px solid var(--border);
             transition: all 0.3s;
             animation: slideIn 0.3s ease-out;
         }
@@ -419,119 +296,92 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
-        .entry-item:hover {
+        .item:hover {
             background: rgba(130, 87, 230, 0.1);
-            border-color: var(--accent-color);
+            border-color: var(--accent);
             transform: translateX(8px);
         }
 
-        .entry-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 8px; 
+        .item-header { 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
         }
 
-        .entry-name { 
-            font-weight: 700; 
+        .item-name { 
+            font-weight: 700;
             color: white;
             font-size: 1.05rem;
         }
 
-        .entry-meta { 
-            color: var(--text-muted); 
-            font-size: 0.85rem; 
+        .item-meta { 
+            color: var(--text-muted);
+            font-size: 0.85rem;
             margin-right: 12px;
             background: rgba(130, 87, 230, 0.2);
             padding: 4px 10px;
             border-radius: 6px;
         }
 
-        .entry-desc { 
-            font-size: 0.9rem; 
+        .item-desc { 
+            font-size: 0.9rem;
             color: var(--text-muted);
             line-height: 1.6;
-            display: block; 
-            word-wrap: break-word; 
+            display: block;
             margin-top: 6px;
         }
 
         button { 
-            cursor: pointer; 
-            border-radius: 10px; 
-            font-weight: 700; 
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: 700;
             border: none;
             transition: all 0.3s;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            position: relative;
-            overflow: hidden;
         }
 
-        button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        button:active::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        button.add-btn { 
-            background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
-            color: white; 
-            padding: 14px; 
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            padding: 14px;
             width: 100%;
             font-size: 0.9rem;
             box-shadow: 0 4px 15px rgba(130, 87, 230, 0.3);
         }
 
-        button.add-btn:hover {
+        .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 25px rgba(130, 87, 230, 0.5);
         }
 
-        button.remove-btn { 
-            background: var(--danger); 
-            color: white; 
-            padding: 6px 12px; 
+        .btn-remove { 
+            background: var(--danger);
+            color: white;
+            padding: 6px 12px;
             font-size: 0.75rem;
             border-radius: 6px;
         }
 
-        button.remove-btn:hover {
+        .btn-remove:hover {
             background: #ff5570;
             transform: scale(1.1);
         }
         
-        button.download-btn {
-            background: linear-gradient(135deg, var(--success) 0%, #03bb56 100%);
+        .btn-download {
+            background: linear-gradient(135deg, var(--success), #03bb56);
             color: white;
-            padding: 20px; 
-            width: 100%; 
+            padding: 20px;
+            width: 100%;
             font-size: 1.2rem;
-            margin-top: 20px; 
+            margin-top: 20px;
             grid-column: 1 / -1;
             box-shadow: 0 8px 30px rgba(4, 211, 97, 0.4);
-            animation: downloadPulse 2s ease-in-out infinite;
         }
 
-        @keyframes downloadPulse {
-            0%, 100% { box-shadow: 0 8px 30px rgba(4, 211, 97, 0.4); }
-            50% { box-shadow: 0 12px 40px rgba(4, 211, 97, 0.6); }
-        }
-
-        button.download-btn:hover { 
-            background: linear-gradient(135deg, #03bb56 0%, var(--success) 100%);
+        .btn-download:hover { 
+            background: linear-gradient(135deg, #03bb56, var(--success));
             transform: translateY(-4px);
             box-shadow: 0 12px 50px rgba(4, 211, 97, 0.6);
         }
@@ -546,7 +396,7 @@
             letter-spacing: 0.5px;
         }
 
-        .info-text {
+        .info {
             font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: -10px;
@@ -554,14 +404,14 @@
             padding: 8px 12px;
             background: rgba(130, 87, 230, 0.05);
             border-radius: 6px;
-            border-left: 3px solid var(--accent-color);
+            border-left: 3px solid var(--accent);
         }
 
         @media (max-width: 1200px) { 
             .container { 
-                grid-template-columns: 1fr 1fr; 
+                grid-template-columns: 1fr 1fr;
             }
-            .panel:nth-child(2) {
+            .container > div:nth-child(2) {
                 grid-column: 1 / -1;
             }
         }
@@ -572,460 +422,353 @@
                 gap: 16px;
             }
             
-            body {
-                padding: 12px;
-            }
-
-            .panel, .panel-lateral {
-                padding: 16px;
-            }
-
-            .main-title {
+            body { padding: 12px; }
+            .panel { padding: 16px; }
+            .title {
                 font-size: 1.8rem;
                 letter-spacing: 2px;
-                margin-bottom: 20px;
             }
-
-            .big-stat-grid {
+            .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-        }
-
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <div class="main-title">⚔️ Sombra do Condor ⚔️</div>
+        <div class="title">⚔️ Sombra do Condor ⚔️</div>
 
         <div class="panel">
-            <h2>
-                Perícias 
-                <span id="skillTracker" class="tracker-badge">Slots: 0/2</span>
-            </h2>
-            <p class="info-text">
-                📊 Base: 2 | +2× por INT | +1 a cada 5 Exp<br>
-                🎯 Máx Nível: +10 (<30 Exp) ou +20 (30+ Exp)
-            </p>
-            <div id="skillsContainer" class="skills-container"></div>
+            <h2>Perícias <span id="skillTracker" class="badge">Slots: 0/2</span></h2>
+            <p class="info">📊 Base: 2 | +2× por INT | +1 a cada 5 Exp<br>🎯 Máx Nível: +10 (&lt;30 Exp) ou +20 (30+ Exp)</p>
+            <div id="skillsContainer" class="scroll-container"></div>
         </div>
 
         <div>
             <div class="panel">
-                <h2>
-                    Atributos
-                    <span id="attrTracker" class="tracker-badge">Pontos: 0/9</span>
-                </h2>
+                <h2>Atributos <span id="attrTracker" class="badge">Pontos: 0/9</span></h2>
                 
                 <div style="margin-bottom: 16px;">
-                    <label>👤 Nome / Codinome</label>
+                    <label>Nome / Codinome</label>
                     <input type="text" id="charName" placeholder="Ex: Kaua Silva (O Monstro)">
                 </div>
                 
                 <div style="margin-bottom: 20px;">
-                    <label>📝 Descrição Física / Idade</label>
+                    <label>Descrição Física / Idade</label>
                     <textarea id="charDesc" rows="2" placeholder="Ex: Jovem de 26 anos, 1.77m, 85kg, corpo musculoso"></textarea>
                 </div>
 
-                <div class="stat-block" style="background: rgba(130, 87, 230, 0.15); border: 2px solid var(--accent-color);">
-                    <span class="stat-label">⭐ EXPERIÊNCIA (EXP)</span>
-                    <input type="number" id="exp" value="5" min="5" onchange="calcularTudo()">
+                <div class="stat-block highlight">
+                    <span class="stat-label">EXPERIÊNCIA (EXP)</span>
+                    <input type="number" id="exp" value="5" min="5" onchange="calcular()">
                 </div>
 
-                <div class="stat-block"><span class="stat-label">💪 FORÇA</span><input type="number" id="attrForca" value="1" min="0" onchange="calcularTudo()"></div>
-                <div class="stat-block"><span class="stat-label">⚡ AGILIDADE</span><input type="number" id="attrAgilidade" value="1" min="0" onchange="calcularTudo()"></div>
-                <div class="stat-block"><span class="stat-label">🛡️ VIGOR</span><input type="number" id="attrVigor" value="1" min="0" onchange="calcularTudo()"></div>
-                <div class="stat-block"><span class="stat-label">👑 PRESENÇA</span><input type="number" id="attrPresenca" value="1" min="0" onchange="calcularTudo()"></div>
-                <div class="stat-block"><span class="stat-label">🧠 INTELECTO</span><input type="number" id="attrIntelecto" value="1" min="0" onchange="calcularTudo()"></div>
+                <div class="stat-block"><span class="stat-label">FORÇA</span><input type="number" id="attrForca" value="1" min="0" onchange="calcular()"></div>
+                <div class="stat-block"><span class="stat-label">AGILIDADE</span><input type="number" id="attrAgilidade" value="1" min="0" onchange="calcular()"></div>
+                <div class="stat-block"><span class="stat-label">VIGOR</span><input type="number" id="attrVigor" value="1" min="0" onchange="calcular()"></div>
+                <div class="stat-block"><span class="stat-label">PRESENÇA</span><input type="number" id="attrPresenca" value="1" min="0" onchange="calcular()"></div>
+                <div class="stat-block"><span class="stat-label">INTELECTO</span><input type="number" id="attrIntelecto" value="1" min="0" onchange="calcular()"></div>
 
-                <div class="big-stat-grid">
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayPV">10</div><div class="big-stat-label">❤️ Vitalidade</div></div>
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayDefesa">11</div><div class="big-stat-label">🛡️ Defesa</div></div>
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayPE">0</div><div class="big-stat-label">⚡ P. Esforço</div></div>
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayCarga">0</div><div class="big-stat-label">📦 Carga Máx</div></div>
-                    <div class="big-stat-box"><div class="big-stat-value" id="displayDeslocamento">0</div><div class="big-stat-label">🏃 Deslocamento</div></div>
+                <div class="stats-grid">
+                    <div class="stat-box"><div class="stat-value" id="pv">10</div><div class="stat-name">Vitalidade</div></div>
+                    <div class="stat-box"><div class="stat-value" id="def">11</div><div class="stat-name">Defesa</div></div>
+                    <div class="stat-box"><div class="stat-value" id="pe">0</div><div class="stat-name">P. Esforço</div></div>
+                    <div class="stat-box"><div class="stat-value" id="carga">0</div><div class="stat-name">Carga Máx</div></div>
+                    <div class="stat-box"><div class="stat-value" id="desloc">0</div><div class="stat-name">Deslocamento</div></div>
                 </div>
             </div>
 
             <div class="panel">
-                <h2>
-                    Habilidades
-                    <span id="habTracker" class="tracker-badge">Habs: 0/2</span>
-                </h2>
-                <div class="entry-form">
-                    <input type="text" id="newHabName" placeholder="🎯 Nome da Habilidade">
-                    <textarea id="newHabDesc" placeholder="📋 Descrição (Efeito, Custo...)" rows="3" style="resize: vertical;"></textarea>
-                    <button class="add-btn" onclick="adicionarHabilidade()">✨ ADICIONAR HABILIDADE</button>
+                <h2>Habilidades <span id="habTracker" class="badge">Habs: 0/2</span></h2>
+                <div class="form">
+                    <input type="text" id="habName" placeholder="Nome da Habilidade">
+                    <textarea id="habDesc" placeholder="Descrição (Efeito, Custo...)" rows="3"></textarea>
+                    <button class="btn-primary" onclick="addHab()">ADICIONAR HABILIDADE</button>
                 </div>
-                <ul id="habList" class="entry-list"></ul>
+                <ul id="habList" class="list"></ul>
             </div>
         </div>
 
         <div>
             <div class="panel">
-                <h2>
-                    Inventário
-                    <span id="loadTracker" class="tracker-badge">Peso: 0</span>
-                </h2>
-                <div class="entry-form">
-                    <input type="text" id="newItemName" placeholder="🎒 Nome do Item">
+                <h2>Inventário <span id="loadTracker" class="badge">Peso: 0</span></h2>
+                <div class="form">
+                    <input type="text" id="itemName" placeholder="Nome do Item">
                     <div style="display:flex; gap:8px;">
-                        <input type="number" id="newItemWeight" placeholder="⚖️ Peso" style="width: 80px;">
-                        <input type="text" id="newItemDesc" placeholder="📝 Descrição / Dano" style="flex-grow:1;">
+                        <input type="number" id="itemWeight" placeholder="Peso" style="width: 80px;">
+                        <input type="text" id="itemDesc" placeholder="Descrição / Dano" style="flex:1;">
                     </div>
-                    <button class="add-btn" onclick="adicionarItem()">➕ ADICIONAR ITEM</button>
+                    <button class="btn-primary" onclick="addItem()">➕ ADICIONAR ITEM</button>
                 </div>
-                <ul id="inventoryList" class="entry-list"></ul>
+                <ul id="invList" class="list"></ul>
             </div>
 
             <div class="panel">
-                <h2>📚 Habilidades Padrão</h2>
-                <p class="info-text">💡 Clique em uma habilidade para adicioná-la automaticamente</p>
-                <div id="habsContainer" class="habs-container"></div>
+                <h2>Habilidades Padrão</h2>
+                <p class="info">Clique em uma habilidade para adicioná-la automaticamente</p>
+                <div id="habsContainer" class="scroll-container"></div>
             </div>
         </div>
 
-        <button class="download-btn" onclick="baixarFicha()">💾 BAIXAR FICHA (.TXT)</button>
+        <button class="btn-download" onclick="download()">💾 BAIXAR FICHA (.TXT)</button>
     </div>
 
     <script>
-        const periciasList = [
+        const skills = [
             { nome: "Acrobacia", attr: "AGI" }, { nome: "Adestramento", attr: "PRE" },
             { nome: "Artes", attr: "PRE" }, { nome: "Atletismo", attr: "FOR" },
             { nome: "Atualidades", attr: "INT" }, { nome: "Ciências", attr: "INT" },
-            { nome: "Crime", attr: "AGI" },
-            { nome: "Diplomacia", attr: "PRE" }, { nome: "Enganação", attr: "PRE" },
-            { nome: "Engenharia", attr: "INT" }, { nome: "Fortitude", attr: "VIG" },
-            { nome: "Furtividade", attr: "AGI" }, { nome: "Iniciativa", attr: "AGI" },
-            { nome: "Intimidação", attr: "PRE" }, { nome: "Intuição", attr: "PRE" },
-            { nome: "Investigação", attr: "INT" }, { nome: "Luta", attr: "FOR" },
-            { nome: "Medicina", attr: "INT" }, { nome: "Percepção", attr: "PRE" },
-            { nome: "Pilotagem", attr: "AGI" }, { nome: "Pontaria", attr: "AGI" },
-            { nome: "Reflexos", attr: "AGI" }, { nome: "Religião", attr: "PRE" },
-            { nome: "Sobrevivência", attr: "INT" }, { nome: "Tática", attr: "INT" },
-            { nome: "Tecnologia", attr: "INT" }, { nome: "Vontade", attr: "PRE" }
+            { nome: "Crime", attr: "AGI" }, { nome: "Diplomacia", attr: "PRE" },
+            { nome: "Enganação", attr: "PRE" }, { nome: "Engenharia", attr: "INT" },
+            { nome: "Fortitude", attr: "VIG" }, { nome: "Furtividade", attr: "AGI" },
+            { nome: "Iniciativa", attr: "AGI" }, { nome: "Intimidação", attr: "PRE" },
+            { nome: "Intuição", attr: "PRE" }, { nome: "Investigação", attr: "INT" },
+            { nome: "Luta", attr: "FOR" }, { nome: "Medicina", attr: "INT" },
+            { nome: "Percepção", attr: "PRE" }, { nome: "Pilotagem", attr: "AGI" },
+            { nome: "Pontaria", attr: "AGI" }, { nome: "Reflexos", attr: "AGI" },
+            { nome: "Religião", attr: "PRE" }, { nome: "Sobrevivência", attr: "INT" },
+            { nome: "Tática", attr: "INT" }, { nome: "Tecnologia", attr: "INT" },
+            { nome: "Vontade", attr: "PRE" }
         ];
 
-        const habsPadraoList = [
-            {nome:"Empenho",gasto:"1PE",efeito:"Ganha +5 em um teste de uma pericia treinada"},
-            {nome:"Mira de Elite",gasto:"2PE e ação de movimento/reação",efeito:"Ganha +10 no acerto em pontaria e ganha 1d6 a mais de dano"},
-            {nome:"Corredor Nato",gasto:"1PE",efeito:"Se desloca 3 blocos a mais na ação de movimento"},
-            {nome:"Gladiador",gasto:"2PE",efeito:"Ganha +10 no acerto em luta e pode derrubar o alvo dt 15 reflexo"},
-            {nome:"Perito",gasto:"2PE",efeito:"Ganha +10 em um teste de uma pericia treinada"},
-            {nome:"Tiro Furtivo",gasto:"Nenhum",efeito:"Causa 2d8 a mais de dano em um disparo ao estar furtivo"},
-            {nome:"Ecletico",gasto:"2PE",efeito:"Ganha +5 em um teste relacionado a intelecto ou presença"},
-            {nome:"Ataque Frenético",gasto:"3PE",efeito:"Ganha 1 ataque adicional naquela rodada"},
-            {nome:"Golpe Pesado",gasto:"2PE",efeito:"Causa +2d6 de dano em um golpe corpo a corpo (stacka até 2x)"},
-            {nome:"Lutador Nato",gasto:"Nenhum",efeito:"Seus golpes padrão causam 1d8+atributo de dano podendo ser letais, e agora o critico deles é 19/20"},
-            {nome:"Soco Pesado",gasto:"3PE",efeito:"Ataca com um poderoso soco causando 3d8+força em dano"}, 
-            {nome:"Bloqueio Pesado",gasto:"2PE",efeito:"Ao bloquear alem de usar luta como rd, usa fortitude tambem"},
-            {nome:"Esquiva Aprimorada",gasto:"2PE",efeito:"Ao esquivar ganha +10 na soma"},
-            {nome:"Casca Grossa",gasto:"Nenhum",efeito:"Sua pele é naturalmente grossa e seu corpo resistente, tem 5 de rd natural contra impacto balistico e cortante (requer 3 de vigor ou mais)"},
-            {nome:"Lingua de prata",gasto:"Nenhum",efeito:"Tem +5 em testes de diplomacia e enganação, pode gastar 1 PE e ter +5 no teste"},
-            {nome:"Contra-ataque efetivo",gasto:"2PE",efeito:"Causa +1d8 de dano e tem +8 no acerto do contraataque"},
-            {nome:"Assasinato",gasto:"2PE",efeito:"Aumenta a margem de critico em 5, e causa 1d6 a mais de dano em um ataque"},
-            {nome:"Tiro sequencial",gasto:"1PE",efeito:"Ataca novamente com uma arma leve (max:1x rodada)"},
-            {nome:"Tiro brutal",gasto:"3PE",efeito:"Em um disparo, aumenta a margem de critico em 5 e causa +2d6 de dano"}
+        const defaultHabs = [
+            { nome: "Empenho", gasto: "1PE", efeito: "Ganha +5 em um teste de uma pericia treinada" },
+            { nome: "Mira de Elite", gasto: "2PE e ação de movimento/reação", efeito: "Ganha +10 no acerto em pontaria e ganha 1d6 a mais de dano" },
+            { nome: "Corredor Nato", gasto: "1PE", efeito: "Se desloca 3 blocos a mais na ação de movimento" },
+            { nome: "Gladiador", gasto: "2PE", efeito: "Ganha +10 no acerto em luta e pode derrubar o alvo dt 15 reflexo" },
+            { nome: "Perito", gasto: "2PE", efeito: "Ganha +10 em um teste de uma pericia treinada" },
+            { nome: "Tiro Furtivo", gasto: "Nenhum", efeito: "Causa 2d8 a mais de dano em um disparo ao estar furtivo" },
+            { nome: "Ecletico", gasto: "2PE", efeito: "Ganha +5 em um teste relacionado a intelecto ou presença" },
+            { nome: "Ataque Frenético", gasto: "3PE", efeito: "Ganha 1 ataque adicional naquela rodada" },
+            { nome: "Golpe Pesado", gasto: "2PE", efeito: "Causa +2d6 de dano em um golpe corpo a corpo (stacka até 2x)" },
+            { nome: "Lutador Nato", gasto: "Nenhum", efeito: "Seus golpes padrão causam 1d8+atributo de dano podendo ser letais, e agora o critico deles é 19/20" },
+            { nome: "Soco Pesado", gasto: "3PE", efeito: "Ataca com um poderoso soco causando 3d8+força em dano" },
+            { nome: "Bloqueio Pesado", gasto: "2PE", efeito: "Ao bloquear alem de usar luta como rd, usa fortitude tambem" },
+            { nome: "Esquiva Aprimorada", gasto: "2PE", efeito: "Ao esquivar ganha +10 na soma" },
+            { nome: "Casca Grossa", gasto: "Nenhum", efeito: "Sua pele é naturalmente grossa e seu corpo resistente, tem 5 de rd natural contra impacto balistico e cortante (requer 3 de vigor ou mais)" },
+            { nome: "Lingua de prata", gasto: "Nenhum", efeito: "Tem +5 em testes de diplomacia e enganação, pode gastar 1 PE e ter +5 no teste" },
+            { nome: "Contra-ataque efetivo", gasto: "2PE", efeito: "Causa +1d8 de dano e tem +8 no acerto do contraataque" },
+            { nome: "Assasinato", gasto: "2PE", efeito: "Aumenta a margem de critico em 5, e causa 1d6 a mais de dano em um ataque" },
+            { nome: "Tiro sequencial", gasto: "1PE", efeito: "Ataca novamente com uma arma leve (max:1x rodada)" },
+            { nome: "Tiro brutal", gasto: "3PE", efeito: "Em um disparo, aumenta a margem de critico em 5 e causa +2d6 de dano" },
+            { nome: "Brigão", gasto: "2PE", efeito: "Ataca novamente com um soco. (Max:2x rodada)" }
         ];
 
-        let inventario = [];
-        let habilidades = [];
+        let inv = [];
+        let habs = [];
 
-        window.onload = function() {
-            gerarListaPericias();
-            gerarListaHabs();
-            calcularTudo();
+        const get = id => document.getElementById(id);
+        const val = id => parseInt(get(id).value) || 0;
+
+        window.onload = () => {
+            renderSkills();
+            renderDefaultHabs();
+            calcular();
         };
 
-        function gerarListaPericias() {
-            const container = document.getElementById('skillsContainer');
-            container.innerHTML = '';
-            periciasList.forEach((pericia, index) => {
-                const inputId = pericia.nome === "Atletismo" ? "skill_Atletismo" : 
-                                pericia.nome === "Fortitude" ? "skill_Fortitude" : `skill_${pericia.nome}`;
-                
-                const div = document.createElement('div');
-                div.className = 'skill-row';
-                div.style.animationDelay = `${index * 0.02}s`;
-                div.innerHTML = `
-                    <div><span class="skill-name">${pericia.nome}</span> <span class="skill-attr">${pericia.attr}</span></div>
-                    <input type="number" id="${inputId}" class="skill-input" value="0" min="0" step="5" onchange="calcularTudo()">
-                `;
-                container.appendChild(div);
-            });
+        function renderSkills() {
+            const c = get('skillsContainer');
+            c.innerHTML = skills.map((s, i) => `
+                <div class="row" style="animation-delay: ${i * 0.02}s">
+                    <div><span style="font-weight:500">${s.nome}</span> <span class="skill-attr">${s.attr}</span></div>
+                    <input type="number" id="skill_${s.nome}" class="skill-input" value="0" min="0" step="5" onchange="calcular()">
+                </div>
+            `).join('');
         }
 
-        function gerarListaHabs() {
-            const container2 = document.getElementById('habsContainer');
-            container2.innerHTML = "";
-            habsPadraoList.forEach((hab, index) => {
-                const div2 = document.createElement("div");
-                div2.className = "habs-row";
-                div2.style.animationDelay = `${index * 0.02}s`;
-                div2.onclick = () => sugerirHabilidade(hab.nome, hab.gasto, hab.efeito);
-                
-                div2.innerHTML = `
+        function renderDefaultHabs() {
+            const c = get('habsContainer');
+            c.innerHTML = defaultHabs.map((h, i) => `
+                <div class="row clickable" style="animation-delay: ${i * 0.02}s" onclick="quickAddHab('${h.nome}', '${h.gasto}', '${h.efeito.replace(/'/g, "\\'")}')">
                     <div style="width: 100%;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <strong class="skill-name">${hab.nome}</strong> 
-                            <span style="font-size: 0.75rem; color: var(--accent-color); background: rgba(130, 87, 230, 0.2); padding: 2px 8px; border-radius: 4px;">${hab.gasto}</span>
+                            <strong style="font-weight:500">${h.nome}</strong> 
+                            <span style="font-size: 0.75rem; color: var(--accent); background: rgba(130, 87, 230, 0.2); padding: 2px 8px; border-radius: 4px;">${h.gasto}</span>
                         </div>
-                        <small style="color: var(--text-muted); line-height: 1.4;">${hab.efeito}</small>
-                    </div>`;
-                container2.appendChild(div2);
+                        <small style="color: var(--text-muted); line-height: 1.4;">${h.efeito}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function quickAddHab(nome, gasto, efeito) {
+            get('habName').value = nome;
+            get('habDesc').value = `Gasto: ${gasto} | Efeito: ${efeito}`;
+            addHab();
+            get('habName').closest('.panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function calcular() {
+            const exp = val('exp');
+            const expEf = Math.max(0, exp - 5);
+            const attrs = ['Forca', 'Agilidade', 'Vigor', 'Presenca', 'Intelecto'].map(a => val('attr' + a));
+            const [for_, agi, vig, pre, int] = attrs;
+
+            const percepcao = val('skill_Percepção');
+            const vontade = val('skill_Vontade');
+            const fortitude = val('skill_Fortitude');
+            const atletismo = val('skill_Atletismo');
+
+            const bonusPerc = Math.floor(percepcao / 5) * 2;
+            const bonusVont = Math.floor(vontade / 5) * 2;
+
+            // Calcular carga ANTES de atualizar o DOM
+            const maxCarga = 5 + for_ * 2 + Math.floor(atletismo / 5) * 2;
+            
+            get('def').textContent = 10 + agi + bonusPerc;
+            get('pv').textContent = 10 + vig * 3 + expEf + Math.floor(expEf / 5) + fortitude;
+            get('pe').textContent = (for_ + pre + vig) * 2 + Math.floor(expEf / 3) + bonusVont;
+            get('carga').textContent = maxCarga;
+            get('desloc').textContent = agi === 0 ? 1 : agi * 3;
+
+            const maxAttr = 9 + Math.floor(expEf / 10);
+            const usedAttr = attrs.reduce((a, b) => a + b, 0);
+            updateBadge('attrTracker', usedAttr, maxAttr, 'Pontos');
+
+            const maxSkill = exp >= 30 ? 20 : 10;
+            const maxSlots = 2 + int * 2 + Math.floor(expEf / 5);
+            let usedSlots = 0;
+
+            document.querySelectorAll('.skill-input').forEach(inp => {
+                const v = val(inp.id);
+                inp.style.borderColor = v > maxSkill ? 'var(--danger)' : 'var(--border)';
+                inp.style.color = v > maxSkill ? 'var(--danger)' : 'white';
+                usedSlots += Math.floor(v / 5);
             });
+            updateBadge('skillTracker', usedSlots, maxSlots, 'Slots');
+
+            const maxHabs = 2 + int + Math.floor(expEf / 5);
+            updateBadge('habTracker', habs.length, maxHabs, 'Habs');
+
+            const pesoTotal = inv.reduce((sum, item) => sum + item.peso, 0);
+            const tracker = get('loadTracker');
+            tracker.textContent = `Peso: ${pesoTotal}/${maxCarga}`;
+            tracker.className = pesoTotal > maxCarga ? 'badge error' : 'badge ok';
         }
 
-        function sugerirHabilidade(nome, gasto, efeito) {
-            document.getElementById('newHabName').value = nome;
-            document.getElementById('newHabDesc').value = `Gasto: ${gasto} | Efeito: ${efeito}`;
-            adicionarHabilidade();
-            
-            const habSection = document.getElementById('newHabName').closest('.panel');
-            habSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        function updateBadge(id, atual, max, label) {
+            const el = get(id);
+            el.textContent = `${label}: ${atual}/${max}`;
+            el.className = atual > max ? 'badge error' : 'badge ok';
+            if (atual > max) el.textContent += ' ⚠️';
         }
 
-        function calcularTudo() {
-            const rawExp = parseInt(document.getElementById('exp').value) || 5;
-            const expEfetiva = Math.max(0, rawExp - 5); 
+        function addHab() {
+            const nome = get('habName').value.trim();
+            const desc = get('habDesc').value.trim();
 
-            const forca = parseInt(document.getElementById('attrForca').value) || 0;
-            const agilidade = parseInt(document.getElementById('attrAgilidade').value) || 0;
-            const vigor = parseInt(document.getElementById('attrVigor').value) || 0;
-            const presenca = parseInt(document.getElementById('attrPresenca').value) || 0;
-            const intelecto = parseInt(document.getElementById('attrIntelecto').value) || 0;
-            const valPercepcao = parseInt(document.getElementById('skill_Percepção').value) || 0;
-            const valVontade = parseInt(document.getElementById('skill_Vontade').value) || 0;
-            const bonusPercepcao = Math.floor(valPercepcao / 5) * 2;
-            const bonusVontade = Math.floor(valVontade / 5) * 2;
-            const defesaTotal = 10 + agilidade + bonusPercepcao;
-            document.getElementById('displayDefesa').innerText = defesaTotal;
-
-            const pontosAttrBase = 9; 
-            const pontosAttrBonus = Math.floor(expEfetiva / 10);
-            const maxPontosAttr = pontosAttrBase + pontosAttrBonus;
-            const pontosGastos = forca + agilidade + vigor + presenca + intelecto;
-            
-            atualizarTracker('attrTracker', pontosGastos, maxPontosAttr, "Pontos");
-
-            const pvBase = 10;
-            const pvVigor = vigor * 3;
-            const pvExpSimples = expEfetiva;
-            const pvExpMilestone = Math.floor(expEfetiva / 5);
-            const blocosAndados = agilidade === 0 ? 1 : agilidade * 3;
-            const displayDeslocamento = document.getElementById('displayDeslocamento');
-            if (displayDeslocamento) {
-                displayDeslocamento.innerText = blocosAndados;
-            }
-            
-            const skillFortitude = document.getElementById('skill_Fortitude');
-            const valFortitude = skillFortitude ? (parseInt(skillFortitude.value) || 0) : 0;
-            
-            const pvTotal = pvBase + pvVigor + pvExpSimples + pvExpMilestone + valFortitude;
-            document.getElementById('displayPV').innerText = pvTotal;
-            document.getElementById('displayPE').innerText = (forca + presenca + vigor) * 2 + Math.floor(expEfetiva / 3) + bonusVontade;
-
-            const skillAtletismo = document.getElementById('skill_Atletismo');
-            const valAtletismo = skillAtletismo ? (parseInt(skillAtletismo.value) || 0) : 0;
-            const cargaTotal = 5 + (forca * 2) + (Math.floor(valAtletismo / 5) * 2);
-            document.getElementById('displayCarga').innerText = cargaTotal;
-            atualizarPesoInventario(cargaTotal);
-
-            const maxSkillValue = (rawExp >= 30) ? 20 : 10;
-            const slotsBase = 2;
-            const slotsInt = intelecto * 2;
-            const slotsExp = Math.floor(expEfetiva / 5);
-            const maxSlots = slotsBase + slotsInt + slotsExp;
-            let slotsGastos = 0;
-
-            const inputs = document.querySelectorAll('.skill-input');
-            inputs.forEach(input => {
-                let val = parseInt(input.value) || 0;
-                if (val > maxSkillValue) {
-                    input.style.borderColor = "var(--danger)";
-                    input.style.color = "var(--danger)";
-                } else {
-                    input.style.borderColor = "var(--border-color)";
-                    input.style.color = "white";
-                }
-                slotsGastos += Math.floor(val / 5);
-            });
-            atualizarTracker('skillTracker', slotsGastos, maxSlots, "Slots");
-
-            const habsMax = 2 + intelecto + Math.floor(expEfetiva / 5);
-            atualizarTracker('habTracker', habilidades.length, habsMax, "Habs");
-        }
-
-        function atualizarTracker(id, atual, maximo, label) {
-            const el = document.getElementById(id);
-            el.innerText = `${label}: ${atual}/${maximo}`;
-            el.className = (atual > maximo) ? 'tracker-badge error' : 'tracker-badge ok';
-            if (atual > maximo) el.innerText += " ⚠️";
-        }
-
-        function adicionarHabilidade() {
-            const nome = document.getElementById('newHabName').value.trim();
-            const desc = document.getElementById('newHabDesc').value.trim();
-
-            if (nome === "") {
+            if (!nome) {
                 alert("⚠️ Digite um nome para a habilidade!");
                 return;
             }
 
-            habilidades.push({ nome, desc });
-            renderizarHabilidades();
-
-            document.getElementById('newHabName').value = "";
-            document.getElementById('newHabDesc').value = "";
-            
-            calcularTudo();
+            habs.push({ nome, desc });
+            renderHabs();
+            get('habName').value = '';
+            get('habDesc').value = '';
+            calcular();
         }
 
-        function renderizarHabilidades() {
-            const lista = document.getElementById('habList');
-            lista.innerHTML = "";
-            habilidades.forEach((hab, index) => {
-                const li = document.createElement('li');
-                li.className = 'entry-item';
-                li.innerHTML = `
-                    <div class="entry-header">
-                        <span class="entry-name">${hab.nome}</span>
-                        <button class="remove-btn" onclick="removerHabilidade(${index})">✖</button>
+        function renderHabs() {
+            get('habList').innerHTML = habs.map((h, i) => `
+                <li class="item">
+                    <div class="item-header">
+                        <span class="item-name">${h.nome}</span>
+                        <button class="btn-remove" onclick="removeHab(${i})">✖</button>
                     </div>
-                    ${hab.desc ? `<span class="entry-desc">${hab.desc}</span>` : ''}
-                `;
-                lista.appendChild(li);
-            });
+                    ${h.desc ? `<span class="item-desc">${h.desc}</span>` : ''}
+                </li>
+            `).join('');
         }
 
-        function removerHabilidade(index) {
-            habilidades.splice(index, 1);
-            renderizarHabilidades();
-            calcularTudo();
+        function removeHab(i) {
+            habs.splice(i, 1);
+            renderHabs();
+            calcular();
         }
 
-        function adicionarItem() {
-            const nome = document.getElementById('newItemName').value.trim();
-            const peso = parseInt(document.getElementById('newItemWeight').value) || 0;
-            const desc = document.getElementById('newItemDesc').value.trim();
+        function addItem() {
+            const nome = get('itemName').value.trim();
+            const peso = val('itemWeight');
+            const desc = get('itemDesc').value.trim();
+
             if (!nome) {
                 alert("⚠️ Digite um nome para o item!");
                 return;
             }
-            inventario.push({ nome, peso, desc });
-            document.getElementById('newItemName').value = '';
-            document.getElementById('newItemWeight').value = '';
-            document.getElementById('newItemDesc').value = '';
-            renderizarInventario();
-            calcularTudo();
+
+            inv.push({ nome, peso, desc });
+            get('itemName').value = '';
+            get('itemWeight').value = '';
+            get('itemDesc').value = '';
+            renderInv();
+            calcular();
         }
 
-        function removerItem(index) {
-            inventario.splice(index, 1);
-            renderizarInventario();
-            calcularTudo();
-        }
-
-        function renderizarInventario() {
-            const lista = document.getElementById('inventoryList');
-            lista.innerHTML = '';
-            inventario.forEach((item, index) => {
-                const li = document.createElement('li');
-                li.className = 'entry-item';
-                li.innerHTML = `
-                    <div class="entry-header">
-                        <span class="entry-name">${item.nome}</span>
+        function renderInv() {
+            get('invList').innerHTML = inv.map((item, i) => `
+                <li class="item">
+                    <div class="item-header">
+                        <span class="item-name">${item.nome}</span>
                         <div>
-                            <span class="entry-meta">${item.peso}kg</span>
-                            <button class="remove-btn" onclick="removerItem(${index})">✖</button>
+                            <span class="item-meta">${item.peso}kg</span>
+                            <button class="btn-remove" onclick="removeItem(${i})">✖</button>
                         </div>
                     </div>
-                    ${item.desc ? `<span class="entry-desc">${item.desc}</span>` : ''}
-                `;
-                lista.appendChild(li);
-            });
+                    ${item.desc ? `<span class="item-desc">${item.desc}</span>` : ''}
+                </li>
+            `).join('');
         }
 
-        function atualizarPesoInventario(cargaMax) {
-            let pesoTotal = 0;
-            inventario.forEach(i => pesoTotal += i.peso);
-            const tracker = document.getElementById('loadTracker');
-            tracker.innerText = `Peso: ${pesoTotal}/${cargaMax}`;
-            tracker.className = pesoTotal > cargaMax ? 'tracker-badge error' : 'tracker-badge ok';
+        function removeItem(i) {
+            inv.splice(i, 1);
+            renderInv();
+            calcular();
         }
 
-        function baixarFicha() {
-            const btn = document.querySelector('.download-btn');
-            btn.innerHTML = '<span class="spinner"></span> GERANDO...';
-            btn.classList.add('loading');
+        function download() {
+            const btn = event.target;
+            btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite">⏳</span> GERANDO...';
+            btn.style.opacity = '0.7';
 
             setTimeout(() => {
-                const nome = document.getElementById('charName').value || "Sem Nome";
-                const descFisica = document.getElementById('charDesc').value || "";
-                const exp = document.getElementById('exp').value;
-                const pv = document.getElementById('displayPV').innerText;
-                const pe = document.getElementById('displayPE').innerText;
-                const def = document.getElementById('displayDefesa').innerText;
-                
-                const forca = document.getElementById('attrForca').value;
-                const agi = document.getElementById('attrAgilidade').value;
-                const vig = document.getElementById('attrVigor').value;
-                const pre = document.getElementById('attrPresenca').value;
-                const int = document.getElementById('attrIntelecto').value;
+                const nome = get('charName').value || "Sem Nome";
+                const desc = get('charDesc').value;
 
-                let texto = `${nome}\n\n`;
-                if (descFisica) texto += `Descrição: ${descFisica}\n\n`;
+                let txt = `${nome}\n\n`;
+                if (desc) txt += `Descrição: ${desc}\n\n`;
                 
-                texto += `Exp:${exp}\n\n`;
-                texto += `Vitalidade: ${pv}\n`;
-                texto += `Força: ${forca}\n`;
-                texto += `Agilidade: ${agi}\n`;
-                texto += `Presença: ${pre}\n`;
-                texto += `Vigor: ${vig}\n`;
-                texto += `Intelecto: ${int}\n`;
-                texto += `Pontos de Esforço (PE): ${pe}\n\n`;
-                texto += `Defesa:${def}\n\n`;
+                txt += `Exp: ${val('exp')}\n\n`;
+                txt += `Vitalidade: ${get('pv').textContent}\n`;
+                txt += `Força: ${val('attrForca')}\n`;
+                txt += `Agilidade: ${val('attrAgilidade')}\n`;
+                txt += `Presença: ${val('attrPresenca')}\n`;
+                txt += `Vigor: ${val('attrVigor')}\n`;
+                txt += `Intelecto: ${val('attrIntelecto')}\n`;
+                txt += `Pontos de Esforço (PE): ${get('pe').textContent}\n\n`;
+                txt += `Defesa: ${get('def').textContent}\n\n`;
 
-                texto += `Itens\n\n`;
-                if (inventario.length === 0) texto += `(Nenhum item)\n`;
-                inventario.forEach(item => {
-                    let descFormatada = item.desc ? `: ${item.desc}` : "";
-                    texto += `${item.nome}${descFormatada}\n\n`;
+                txt += `Itens\n\n`;
+                if (inv.length === 0) txt += `(Nenhum item)\n`;
+                inv.forEach(item => {
+                    txt += `${item.nome}${item.desc ? ': ' + item.desc : ''}\n\n`;
                 });
 
-                texto += `Pericias: ____________________________________________\n`;
-                const inputs = document.querySelectorAll('.skill-input');
-                inputs.forEach(input => {
-                    if(parseInt(input.value) > 0) {
-                        const nomeSkill = input.closest('.skill-row').querySelector('.skill-name').innerText;
-                        texto += `${nomeSkill} +${input.value}\n`;
+                txt += `Perícias:\n`;
+                document.querySelectorAll('.skill-input').forEach(inp => {
+                    const v = val(inp.id);
+                    if (v > 0) {
+                        const skillName = inp.closest('.row').querySelector('span').textContent;
+                        txt += `${skillName} +${v}\n`;
                     }
                 });
 
-                texto += `\nHabilidades\n\n`;
-                habilidades.forEach(h => {
-                    texto += `${h.nome}:${h.desc}\n\n`;
+                txt += `\nHabilidades\n\n`;
+                habs.forEach(h => {
+                    txt += `${h.nome}: ${h.desc}\n\n`;
                 });
 
-                const blob = new Blob([texto], { type: "text/plain" });
+                const blob = new Blob([txt], { type: "text/plain" });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
                 link.download = `Ficha_${nome.replace(/\s+/g, '_')}.txt`;
@@ -1034,10 +777,15 @@
                 btn.innerHTML = '✅ FICHA BAIXADA!';
                 setTimeout(() => {
                     btn.innerHTML = '💾 BAIXAR FICHA (.TXT)';
-                    btn.classList.remove('loading');
+                    btn.style.opacity = '1';
                 }, 2000);
             }, 800);
         }
     </script>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </body>
 </html>
