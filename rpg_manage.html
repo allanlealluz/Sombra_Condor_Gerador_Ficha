@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sombra do Condor - Dashboard de Combate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="sombra do condor.png" type="image/x-icon">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-panel: rgba(26, 26, 36, 0.95);
+            --accent: #8257e6;
+            --accent-hover: #9d7bef;
+            --accent-glow: rgba(130, 87, 230, 0.4);
+            --text: #e1e1e6;
+            --text-muted: #a8a8b3;
+            --highlight: #252530;
+            --danger: #e83f5b;
+            --success: #04d361;
+            --border: #2d2d3a;
+            --pe-color: #4ecca3;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #121218 100%) fixed;
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Área de Importação */
+        .import-section {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 15px;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .btn-primary { 
+            background: var(--accent); 
+            color: white; 
+            width: 100%; 
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        .btn-primary:hover { background: var(--accent-hover); transform: scale(1.01); }
+
+        /* Grid de Cards */
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .card-header {
+            padding: 20px;
+            background: linear-gradient(to right, rgba(130, 87, 230, 0.2), transparent);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .char-name { font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 5px; }
+        .char-desc { font-size: 0.85rem; color: var(--text-muted); font-style: italic; line-height: 1.3; }
+
+        /* Status Principais */
+        .stats-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .attr-pill {
+            background: var(--highlight);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .attr-pill label { display: block; font-size: 0.65rem; color: var(--text-muted); font-weight: 800; }
+        .attr-pill span { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
+
+        /* Barras */
+        .bars-container { padding: 0 20px 20px 20px; }
+        .stat-row { margin-top: 15px; }
+        .stat-label { display: flex; justify-content: space-between; font-weight: 800; font-size: 0.75rem; margin-bottom: 5px; text-transform: uppercase; }
+        
+        .bar-bg { background: #000; height: 14px; border-radius: 7px; overflow: hidden; border: 1px solid var(--border); }
+        .bar-fill { height: 100%; transition: width 0.5s ease; }
+        .hp-fill { background: linear-gradient(90deg, #e83f5b, #ff5570); }
+        .pe-fill { background: linear-gradient(90deg, #04d361, #4ecca3); }
+
+        .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 8px; }
+        .ctrl-btn { background: var(--highlight); border: none; color: #fff; padding: 5px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.7rem; }
+        .ctrl-btn:hover { background: var(--border); }
+
+        /* Detalhes Expansíveis */
+        .btn-expand {
+            background: var(--highlight);
+            border: none;
+            color: var(--text);
+            padding: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            border-top: 1px solid var(--border);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            background: rgba(0,0,0,0.3);
+        }
+        .details-content.open { max-height: 1500px; padding: 20px; border-top: 1px solid var(--border); overflow-y: auto; }
+
+        .detail-section { margin-bottom: 20px; }
+        .detail-title { 
+            color: var(--accent); 
+            font-size: 0.75rem; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            border-left: 3px solid var(--accent);
+            padding-left: 8px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        .detail-text { 
+            font-size: 0.85rem; 
+            color: var(--text); 
+            line-height: 1.5; 
+            white-space: pre-wrap; /* Mantém as quebras de linha do texto original */
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(232, 63, 91, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 5;
+        }
+
+        .attr-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="title">⚔️ Gestor de Combate Condor ⚔️</div>
+
+        <div class="import-section">
+            <textarea id="importText" placeholder="Cole aqui o texto completo da sua ficha (pode copiar tudo do .txt)..."></textarea>
+            <button class="btn-primary" onclick="importCharacter()">ADICIONAR PERSONAGEM</button>
+        </div>
+
+        <div class="char-grid" id="charGrid"></div>
+    </div>
+
+    <script>
+        let characters = JSON.parse(localStorage.getItem('condorCombatData')) || [];
+
+        function save() {
+            localStorage.setItem('condorCombatData', JSON.stringify(characters));
+            render();
+        }
+
+        function cleanText(text) {
+            if (!text) return "";
+            return text.replace(/_{2,}/g, '').trim(); // Remove linhas decorativas ________
+        }
+
+        // Função de captura inteligente por âncoras
+        function getSection(text, startAnchor, endAnchors) {
+            const startIdx = text.search(new RegExp(startAnchor, "i"));
+            if (startIdx === -1) return "";
+
+            let sectionContent = text.substring(startIdx + startAnchor.length);
+            let closestEnd = sectionContent.length;
+
+            endAnchors.forEach(anchor => {
+                const endIdx = sectionContent.search(new RegExp(anchor, "i"));
+                if (endIdx !== -1 && endIdx < closestEnd) {
+                    closestEnd = endIdx;
+                }
+            });
+
+            return cleanText(sectionContent.substring(0, closestEnd));
+        }
+
+        function importCharacter() {
+            const raw = document.getElementById('importText').value;
+            if (!raw.trim()) return;
+
+            // 1. Extrair Dados Básicos
+            const name = raw.split('\n')[0].split('(')[0].trim();
+            const vitMatch = raw.match(/Vitalidade:\s*(\d+)/i);
+            const peMatch = raw.match(/Pontos de Esforço \(PE\):\s*(\d+)/i);
+            const defMatch = raw.match(/Defesa:\s*(\d+)/i);
+            const descMatch = raw.match(/Descrição:\s*([\s\S]*?)(?=Exp:|Vitalidade:|Força:)/i);
+
+            // 2. Extrair Atributos (para o card pequeno)
+            const forca = raw.match(/Força:\s*(\d+)/i)?.[1] || "0";
+            const agi = raw.match(/Agilidade:\s*(\d+)/i)?.[1] || "0";
+            const vig = raw.match(/Vigor:\s*(\d+)/i)?.[1] || "0";
+
+            // 3. Extrair Seções Grandes (Usando âncoras para não cortar nada)
+            const itens = getSection(raw, "Itens", ["Pericias:", "Perícias:", "Habilidades", "Condição:"]);
+            const pericias = getSection(raw, "Perícias:|Pericias:", ["Habilidades", "Condição:"]);
+            const habs = getSection(raw, "Habilidades", ["Condição:"]);
+            const condicao = getSection(raw, "Condição:", ["---"]); // Fim da ficha
+
+            const newChar = {
+                id: Date.now(),
+                name: name,
+                desc: descMatch ? descMatch[1].trim() : "",
+                maxHP: vitMatch ? parseInt(vitMatch[1]) : 1,
+                currentHP: vitMatch ? parseInt(vitMatch[1]) : 1,
+                maxPE: peMatch ? parseInt(peMatch[1]) : 1,
+                currentPE: peMatch ? parseInt(peMatch[1]) : 1,
+                def: defMatch ? defMatch[1] : '10',
+                stats: { forca, agi, vig },
+                details: { itens, pericias, habs, condicao }
+            };
+
+            characters.push(newChar);
+            document.getElementById('importText').value = '';
+            save();
+        }
+
+        function updateStat(id, type, amount) {
+            const char = characters.find(c => c.id === id);
+            if (!char) return;
+            if (type === 'hp') char.currentHP = Math.min(char.maxHP, Math.max(0, char.currentHP + amount));
+            else char.currentPE = Math.min(char.maxPE, Math.max(0, char.currentPE + amount));
+            save();
+        }
+
+        function deleteChar(id) {
+            if(confirm("Remover do combate?")) {
+                characters = characters.filter(c => c.id !== id);
+                save();
+            }
+        }
+
+        function toggleDetails(id) {
+            const el = document.getElementById(`details-${id}`);
+            el.classList.toggle('open');
+            const btn = document.getElementById(`btn-${id}`);
+            btn.innerText = el.classList.contains('open') ? "▲ FECHAR DETALHES" : "▼ VER ATRIBUTOS E HABILIDADES";
+        }
+
+        function render() {
+            const grid = document.getElementById('charGrid');
+            grid.innerHTML = characters.map(char => {
+                const hpPerc = (char.currentHP / char.maxHP) * 100;
+                const pePerc = (char.currentPE / char.maxPE) * 100;
+
+                return `
+                    <div class="card">
+                        <button class="delete-btn" onclick="deleteChar(${char.id})">&times;</button>
+                        
+                        <div class="card-header">
+                            <div class="char-name">${char.name}</div>
+                            <div class="char-desc">${char.desc.substring(0, 100)}${char.desc.length > 100 ? '...' : ''}</div>
+                        </div>
+
+                        <div class="stats-main">
+                            <div class="attr-pill"><label>FORÇA</label><span>${char.stats.forca}</span></div>
+                            <div class="attr-pill"><label>DEFESA</label><span>${char.def}</span></div>
+                        </div>
+
+                        <div class="bars-container">
+                            <div class="stat-row">
+                                <div class="stat-label"><span style="color:var(--danger)">VITALIDADE</span><span>${char.currentHP}/${char.maxHP}</span></div>
+                                <div class="bar-bg"><div class="bar-fill hp-fill" style="width: ${hpPerc}%"></div></div>
+                                <div class="controls">
+                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', -10)">-10</button>
+                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', -1)">-1</button>
+                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', 1)">+1</button>
+                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', 10)">+10</button>
+                                </div>
+                            </div>
+
+                            <div class="stat-row">
+                                <div class="stat-label"><span style="color:var(--pe-color)">ESFORÇO (PE)</span><span>${char.currentPE}/${char.maxPE}</span></div>
+                                <div class="bar-bg"><div class="bar-fill pe-fill" style="width: ${pePerc}%"></div></div>
+                                <div class="controls">
+                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', -3)">-3</button>
+                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', -1)">-1</button>
+                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', 1)">+1</button>
+                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', 5)">+5</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-expand" id="btn-${char.id}" onclick="toggleDetails(${char.id})">▼ VER ATRIBUTOS E HABILIDADES</button>
+                        
+                        <div class="details-content" id="details-${char.id}">
+                            ${char.details.itens ? `
+                                <div class="detail-section">
+                                    <div class="detail-title">ITENS</div>
+                                    <div class="detail-text">${char.details.itens}</div>
+                                </div>` : ''}
+                            
+                            ${char.details.pericias ? `
+                                <div class="detail-section">
+                                    <div class="detail-title">PERÍCIAS</div>
+                                    <div class="detail-text">${char.details.pericias}</div>
+                                </div>` : ''}
+
+                            ${char.details.habs ? `
+                                <div class="detail-section">
+                                    <div class="detail-title">HABILIDADES</div>
+                                    <div class="detail-text">${char.details.habs}</div>
+                                </div>` : ''}
+
+                            ${char.details.condicao ? `
+                                <div class="detail-section">
+                                    <div class="detail-title">CONDIÇÃO ESPECIAL</div>
+                                    <div class="detail-text">${char.details.condicao}</div>
+                                </div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        render();
+    </script>
+</body>
+</html>
