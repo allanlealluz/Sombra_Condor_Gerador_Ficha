@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sombra do Condor - Dashboard de Combate</title>
+    <title>Sombra do Condor - Tático</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="shortcut icon" href="sombra do condor.png" type="image/x-icon">
     <style>
         :root {
             --bg-dark: #0a0a0f;
-            --bg-panel: rgba(26, 26, 36, 0.95);
+            --bg-panel: #16161c;
             --accent: #8257e6;
             --accent-hover: #9d7bef;
-            --accent-glow: rgba(130, 87, 230, 0.4);
             --text: #e1e1e6;
             --text-muted: #a8a8b3;
             --highlight: #252530;
@@ -27,7 +26,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--bg-dark) 0%, #121218 100%) fixed;
+            background: #0a0a0f;
             color: var(--text);
             padding: 20px;
             min-height: 100vh;
@@ -37,202 +36,246 @@
 
         .title {
             text-align: center;
-            font-size: 2rem;
-            font-weight: 800;
+            font-size: 1.5rem;
+            font-weight: 900;
             color: var(--accent);
             text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 30px;
-            text-shadow: 0 0 20px var(--accent-glow);
+            letter-spacing: 2px;
+            margin-bottom: 20px;
         }
 
         /* Área de Importação */
         .import-section {
             background: var(--bg-panel);
-            border-radius: 16px;
-            padding: 20px;
             border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
         }
 
         textarea {
             width: 100%;
-            background: rgba(0,0,0,0.4);
+            background: #0f0f14;
             border: 1px solid var(--border);
             color: var(--text);
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
             resize: vertical;
-            min-height: 120px;
+            min-height: 80px;
         }
 
         .btn-primary { 
             background: var(--accent); 
             color: white; 
-            width: 100%; 
-            padding: 15px;
+            padding: 12px;
             border: none;
-            border-radius: 8px;
-            font-weight: 800;
+            border-radius: 6px;
+            font-weight: 700;
             cursor: pointer;
             text-transform: uppercase;
-            transition: 0.3s;
+            transition: 0.2s;
         }
-        .btn-primary:hover { background: var(--accent-hover); transform: scale(1.01); }
+        .btn-primary:hover { background: var(--accent-hover); }
 
         /* Grid de Cards */
         .char-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
         }
 
         .card {
             background: var(--bg-panel);
-            border-radius: 16px;
+            border-radius: 12px;
             border: 1px solid var(--border);
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
             position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
+        /* Cabeçalho do Card */
         .card-header {
-            padding: 20px;
-            background: linear-gradient(to right, rgba(130, 87, 230, 0.2), transparent);
+            padding: 15px 20px;
+            background: linear-gradient(to right, rgba(130, 87, 230, 0.15), transparent);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .char-name { 
+            font-size: 1.2rem; 
+            font-weight: 900; 
+            color: #fff; 
+            text-transform: uppercase; 
+        }
+
+        /* Grid de Atributos (NOVO) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 2px;
+            background: #000;
+            padding: 2px 0;
             border-bottom: 1px solid var(--border);
         }
 
-        .char-name { font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 5px; }
-        .char-desc { font-size: 0.85rem; color: var(--text-muted); font-style: italic; line-height: 1.3; }
-
-        /* Status Principais */
-        .stats-main {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            padding: 20px;
-            background: rgba(0,0,0,0.2);
-        }
-
-        .attr-pill {
+        .stat-box {
             background: var(--highlight);
-            padding: 10px;
-            border-radius: 8px;
             text-align: center;
+            padding: 8px 2px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        .attr-pill label { display: block; font-size: 0.65rem; color: var(--text-muted); font-weight: 800; }
-        .attr-pill span { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
-
-        /* Barras */
-        .bars-container { padding: 0 20px 20px 20px; }
-        .stat-row { margin-top: 15px; }
-        .stat-label { display: flex; justify-content: space-between; font-weight: 800; font-size: 0.75rem; margin-bottom: 5px; text-transform: uppercase; }
         
-        .bar-bg { background: #000; height: 14px; border-radius: 7px; overflow: hidden; border: 1px solid var(--border); }
-        .bar-fill { height: 100%; transition: width 0.5s ease; }
-        .hp-fill { background: linear-gradient(90deg, #e83f5b, #ff5570); }
-        .pe-fill { background: linear-gradient(90deg, #04d361, #4ecca3); }
+        /* Destaque para Defesa */
+        .stat-box.def { background: rgba(130, 87, 230, 0.15); }
 
-        .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 8px; }
-        .ctrl-btn { background: var(--highlight); border: none; color: #fff; padding: 5px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.7rem; }
-        .ctrl-btn:hover { background: var(--border); }
-
-        /* Detalhes Expansíveis */
-        .btn-expand {
-            background: var(--highlight);
-            border: none;
-            color: var(--text);
-            padding: 12px;
-            font-weight: 800;
-            cursor: pointer;
-            border-top: 1px solid var(--border);
-            text-transform: uppercase;
-            font-size: 0.7rem;
+        .stat-box label { 
+            font-size: 0.6rem; 
+            color: var(--text-muted); 
+            font-weight: 700; 
+            margin-bottom: 2px;
         }
+        .stat-box span { 
+            font-size: 1rem; 
+            font-weight: 800; 
+            color: #fff; 
+        }
+        .stat-box.def span { color: var(--accent); }
+
+        /* Barras de Vida/PE */
+        .bars-container { padding: 15px 20px; }
+        .stat-row { margin-bottom: 15px; }
+        
+        .stat-label { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: 800; 
+            font-size: 0.75rem; 
+            margin-bottom: 6px; 
+            text-transform: uppercase; 
+        }
+        
+        .bar-bg { 
+            background: #0a0a0f; 
+            height: 10px; 
+            border-radius: 5px; 
+            overflow: hidden; 
+            border: 1px solid #333; 
+        }
+        .bar-fill { height: 100%; transition: width 0.3s ease; }
+        .hp-fill { background: var(--danger); }
+        .pe-fill { background: var(--pe-color); }
+
+        /* Botões de Controle (+/-) */
+        .controls { 
+            display: flex; 
+            gap: 4px; 
+            margin-top: 8px; 
+        }
+        .ctrl-btn { 
+            flex: 1;
+            background: var(--highlight); 
+            border: none; 
+            color: var(--text-muted); 
+            padding: 6px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            font-size: 0.7rem; 
+            transition: 0.2s;
+        }
+        .ctrl-btn:hover { background: var(--border); color: #fff; }
+        .ctrl-btn.heal:hover { background: rgba(4, 211, 97, 0.2); color: var(--success); }
+        .ctrl-btn.dmg:hover { background: rgba(232, 63, 91, 0.2); color: var(--danger); }
+
+        /* Detalhes */
+        .btn-expand {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        .btn-expand:hover { background: rgba(255,255,255,0.03); color: var(--accent); }
 
         .details-content {
             max-height: 0;
             overflow: hidden;
-            transition: all 0.4s ease;
-            background: rgba(0,0,0,0.3);
+            transition: max-height 0.3s ease;
+            background: rgba(0,0,0,0.2);
+            padding: 0 20px;
         }
-        .details-content.open { max-height: 1500px; padding: 20px; border-top: 1px solid var(--border); overflow-y: auto; }
+        .details-content.open { 
+            max-height: 800px; 
+            padding-top: 20px; 
+            padding-bottom: 20px; 
+            overflow-y: auto; 
+        }
 
-        .detail-section { margin-bottom: 20px; }
-        .detail-title { 
+        .detail-block { margin-bottom: 15px; }
+        .detail-header { 
             color: var(--accent); 
-            font-size: 0.75rem; 
+            font-size: 0.7rem; 
             font-weight: 900; 
-            text-transform: uppercase; 
-            border-left: 3px solid var(--accent);
-            padding-left: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 5px; 
             letter-spacing: 1px;
         }
         .detail-text { 
-            font-size: 0.85rem; 
-            color: var(--text); 
-            line-height: 1.5; 
-            white-space: pre-wrap; /* Mantém as quebras de linha do texto original */
+            font-size: 0.8rem; 
+            color: #ccc; 
+            line-height: 1.4; 
+            white-space: pre-wrap; 
         }
 
         .delete-btn {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: rgba(232, 63, 91, 0.1);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
+            background: transparent;
+            color: #444;
+            border: none;
+            font-size: 1.2rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            z-index: 5;
+            z-index: 10;
         }
+        .delete-btn:hover { color: var(--danger); }
 
-        .attr-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="title">⚔️ Gestor de Combate Condor ⚔️</div>
+        <div class="title">Painel Tático</div>
 
         <div class="import-section">
-            <textarea id="importText" placeholder="Cole aqui o texto completo da sua ficha (pode copiar tudo do .txt)..."></textarea>
-            <button class="btn-primary" onclick="importCharacter()">ADICIONAR PERSONAGEM</button>
+            <textarea id="importText" placeholder="Cole a ficha aqui..."></textarea>
+            <button class="btn-primary" onclick="importCharacter()">+ Adicionar ao Combate</button>
         </div>
 
         <div class="char-grid" id="charGrid"></div>
     </div>
 
     <script>
-        let characters = JSON.parse(localStorage.getItem('condorCombatData')) || [];
+        let characters = JSON.parse(localStorage.getItem('tacticalTrackerData')) || [];
 
         function save() {
-            localStorage.setItem('condorCombatData', JSON.stringify(characters));
+            localStorage.setItem('tacticalTrackerData', JSON.stringify(characters));
             render();
         }
 
-        function cleanText(text) {
-            if (!text) return "";
-            return text.replace(/_{2,}/g, '').trim(); // Remove linhas decorativas ________
-        }
-
-        // Função de captura inteligente por âncoras
+        // Função auxiliar para capturar seções inteiras
         function getSection(text, startAnchor, endAnchors) {
             const startIdx = text.search(new RegExp(startAnchor, "i"));
             if (startIdx === -1) return "";
@@ -247,41 +290,40 @@
                 }
             });
 
-            return cleanText(sectionContent.substring(0, closestEnd));
+            return sectionContent.substring(0, closestEnd).replace(/_{2,}/g, '').trim();
         }
 
         function importCharacter() {
             const raw = document.getElementById('importText').value;
             if (!raw.trim()) return;
 
-            // 1. Extrair Dados Básicos
+            // Extração de Dados Principais
             const name = raw.split('\n')[0].split('(')[0].trim();
             const vitMatch = raw.match(/Vitalidade:\s*(\d+)/i);
             const peMatch = raw.match(/Pontos de Esforço \(PE\):\s*(\d+)/i);
             const defMatch = raw.match(/Defesa:\s*(\d+)/i);
-            const descMatch = raw.match(/Descrição:\s*([\s\S]*?)(?=Exp:|Vitalidade:|Força:)/i);
 
-            // 2. Extrair Atributos (para o card pequeno)
+            // Extração de Todos os Atributos
             const forca = raw.match(/Força:\s*(\d+)/i)?.[1] || "0";
             const agi = raw.match(/Agilidade:\s*(\d+)/i)?.[1] || "0";
+            const int = raw.match(/Intelecto:\s*(\d+)/i)?.[1] || "0";
+            const pre = raw.match(/Presença:\s*(\d+)/i)?.[1] || "0";
             const vig = raw.match(/Vigor:\s*(\d+)/i)?.[1] || "0";
 
-            // 3. Extrair Seções Grandes (Usando âncoras para não cortar nada)
+            // Seções de Texto
             const itens = getSection(raw, "Itens", ["Pericias:", "Perícias:", "Habilidades", "Condição:"]);
             const pericias = getSection(raw, "Perícias:|Pericias:", ["Habilidades", "Condição:"]);
             const habs = getSection(raw, "Habilidades", ["Condição:"]);
-            const condicao = getSection(raw, "Condição:", ["---"]); // Fim da ficha
+            const condicao = getSection(raw, "Condição:", ["---"]);
 
             const newChar = {
                 id: Date.now(),
                 name: name,
-                desc: descMatch ? descMatch[1].trim() : "",
-                maxHP: vitMatch ? parseInt(vitMatch[1]) : 1,
-                currentHP: vitMatch ? parseInt(vitMatch[1]) : 1,
-                maxPE: peMatch ? parseInt(peMatch[1]) : 1,
-                currentPE: peMatch ? parseInt(peMatch[1]) : 1,
-                def: defMatch ? defMatch[1] : '10',
-                stats: { forca, agi, vig },
+                maxHP: vitMatch ? parseInt(vitMatch[1]) : 10,
+                currentHP: vitMatch ? parseInt(vitMatch[1]) : 10,
+                maxPE: peMatch ? parseInt(peMatch[1]) : 5,
+                currentPE: peMatch ? parseInt(peMatch[1]) : 5,
+                stats: { forca, agi, int, pre, vig, def: defMatch ? defMatch[1] : '10' },
                 details: { itens, pericias, habs, condicao }
             };
 
@@ -299,53 +341,59 @@
         }
 
         function deleteChar(id) {
-            if(confirm("Remover do combate?")) {
+            if(confirm("Apagar personagem?")) {
                 characters = characters.filter(c => c.id !== id);
                 save();
             }
         }
 
         function toggleDetails(id) {
-            const el = document.getElementById(`details-${id}`);
-            el.classList.toggle('open');
-            const btn = document.getElementById(`btn-${id}`);
-            btn.innerText = el.classList.contains('open') ? "▲ FECHAR DETALHES" : "▼ VER ATRIBUTOS E HABILIDADES";
+            document.getElementById(`details-${id}`).classList.toggle('open');
         }
 
         function render() {
             const grid = document.getElementById('charGrid');
             grid.innerHTML = characters.map(char => {
-                const hpPerc = (char.currentHP / char.maxHP) * 100;
-                const pePerc = (char.currentPE / char.maxPE) * 100;
+                const hpPerc = Math.max(0, (char.currentHP / char.maxHP) * 100);
+                const pePerc = Math.max(0, (char.currentPE / char.maxPE) * 100);
 
                 return `
                     <div class="card">
                         <button class="delete-btn" onclick="deleteChar(${char.id})">&times;</button>
                         
                         <div class="card-header">
-                            <div class="char-name">${char.name}</div>
-                            <div class="char-desc">${char.desc.substring(0, 100)}${char.desc.length > 100 ? '...' : ''}</div>
+                            <span class="char-name">${char.name}</span>
                         </div>
 
-                        <div class="stats-main">
-                            <div class="attr-pill"><label>FORÇA</label><span>${char.stats.forca}</span></div>
-                            <div class="attr-pill"><label>DEFESA</label><span>${char.def}</span></div>
+                        <div class="stats-grid">
+                            <div class="stat-box"><label>AGI</label><span>${char.stats.agi}</span></div>
+                            <div class="stat-box"><label>FOR</label><span>${char.stats.forca}</span></div>
+                            <div class="stat-box"><label>INT</label><span>${char.stats.int}</span></div>
+                            <div class="stat-box"><label>PRE</label><span>${char.stats.pre}</span></div>
+                            <div class="stat-box"><label>VIG</label><span>${char.stats.vig}</span></div>
+                            <div class="stat-box def"><label>DEF</label><span>${char.stats.def}</span></div>
                         </div>
 
                         <div class="bars-container">
                             <div class="stat-row">
-                                <div class="stat-label"><span style="color:var(--danger)">VITALIDADE</span><span>${char.currentHP}/${char.maxHP}</span></div>
+                                <div class="stat-label">
+                                    <span style="color:#ff5555">PV</span>
+                                    <span>${char.currentHP}/${char.maxHP}</span>
+                                </div>
                                 <div class="bar-bg"><div class="bar-fill hp-fill" style="width: ${hpPerc}%"></div></div>
                                 <div class="controls">
-                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', -10)">-10</button>
-                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', -1)">-1</button>
-                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', 1)">+1</button>
-                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', 10)">+10</button>
+                                    <button class="ctrl-btn dmg" onclick="updateStat(${char.id}, 'hp', -10)">-10</button>
+                                    <button class="ctrl-btn dmg" onclick="updateStat(${char.id}, 'hp', -1)">-1</button>
+                                    <button class="ctrl-btn heal" onclick="updateStat(${char.id}, 'hp', 1)">+1</button>
+                                    <button class="ctrl-btn heal" onclick="updateStat(${char.id}, 'hp', 10)">+10</button>
                                 </div>
                             </div>
 
-                            <div class="stat-row">
-                                <div class="stat-label"><span style="color:var(--pe-color)">ESFORÇO (PE)</span><span>${char.currentPE}/${char.maxPE}</span></div>
+                            <div class="stat-row" style="margin-bottom:0">
+                                <div class="stat-label">
+                                    <span style="color:var(--pe-color)">PE</span>
+                                    <span>${char.currentPE}/${char.maxPE}</span>
+                                </div>
                                 <div class="bar-bg"><div class="bar-fill pe-fill" style="width: ${pePerc}%"></div></div>
                                 <div class="controls">
                                     <button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', -3)">-3</button>
@@ -356,32 +404,13 @@
                             </div>
                         </div>
 
-                        <button class="btn-expand" id="btn-${char.id}" onclick="toggleDetails(${char.id})">▼ VER ATRIBUTOS E HABILIDADES</button>
+                        <button class="btn-expand" onclick="toggleDetails(${char.id})">Inventário e Habilidades</button>
                         
                         <div class="details-content" id="details-${char.id}">
-                            ${char.details.itens ? `
-                                <div class="detail-section">
-                                    <div class="detail-title">ITENS</div>
-                                    <div class="detail-text">${char.details.itens}</div>
-                                </div>` : ''}
-                            
-                            ${char.details.pericias ? `
-                                <div class="detail-section">
-                                    <div class="detail-title">PERÍCIAS</div>
-                                    <div class="detail-text">${char.details.pericias}</div>
-                                </div>` : ''}
-
-                            ${char.details.habs ? `
-                                <div class="detail-section">
-                                    <div class="detail-title">HABILIDADES</div>
-                                    <div class="detail-text">${char.details.habs}</div>
-                                </div>` : ''}
-
-                            ${char.details.condicao ? `
-                                <div class="detail-section">
-                                    <div class="detail-title">CONDIÇÃO ESPECIAL</div>
-                                    <div class="detail-text">${char.details.condicao}</div>
-                                </div>` : ''}
+                            ${char.details.itens ? `<div class="detail-block"><div class="detail-header">ITENS</div><div class="detail-text">${char.details.itens}</div></div>` : ''}
+                            ${char.details.pericias ? `<div class="detail-block"><div class="detail-header">PERÍCIAS</div><div class="detail-text">${char.details.pericias}</div></div>` : ''}
+                            ${char.details.habs ? `<div class="detail-block"><div class="detail-header">HABILIDADES</div><div class="detail-text">${char.details.habs}</div></div>` : ''}
+                            ${char.details.condicao ? `<div class="detail-block"><div class="detail-header">CONDIÇÃO</div><div class="detail-text">${char.details.condicao}</div></div>` : ''}
                         </div>
                     </div>
                 `;
