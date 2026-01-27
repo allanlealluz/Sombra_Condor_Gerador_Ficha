@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sombra do Condor - Tático</title>
+    <title>Sombra do Condor - VTT 2.2 (Itens Update)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="shortcut icon" href="sombra do condor.png" type="image/x-icon">
     <style>
         :root {
             --bg-dark: #0a0a0f;
@@ -18,6 +17,7 @@
             --highlight: #252530;
             --danger: #e83f5b;
             --success: #04d361;
+            --active-turn: #00ff88;
             --border: #2d2d3a;
             --pe-color: #4ecca3;
         }
@@ -34,302 +34,472 @@
 
         .container { max-width: 1200px; margin: 0 auto; }
 
-        .title {
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
+        /* HEADER & CONTROLS */
+        .header-area {
+            background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px;
+            padding: 20px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px;
         }
 
-        /* Área de Importação */
+        .top-row { display: flex; justify-content: space-between; align-items: center; }
+        .title { font-size: 1.5rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
+
+        .turn-display {
+            background: #000; padding: 10px 25px; border-radius: 8px; border: 1px solid var(--border); text-align: center;
+        }
+        .turn-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .turn-number { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
+
+        .combat-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .btn-control {
+            padding: 12px 20px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .btn-start { background: var(--success); color: #003311; }
+        .btn-start:hover { background: #00ff77; }
+        .btn-next { background: var(--accent); color: white; }
+        .btn-next:hover { background: var(--accent-hover); }
+        .btn-sort { background: var(--highlight); color: var(--text); border: 1px solid var(--border); }
+        .btn-reset { background: rgba(232, 63, 91, 0.2); color: var(--danger); }
+
+        /* IMPORT */
         .import-section {
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 30px;
-            display: flex;
-            gap: 10px;
-            flex-direction: column;
+            background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px;
+            padding: 15px; margin-bottom: 30px;
         }
-
+        details > summary { cursor: pointer; color: var(--text-muted); font-weight: bold; margin-bottom: 10px; }
         textarea {
-            width: 100%;
-            background: #0f0f14;
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px;
-            border-radius: 6px;
-            font-family: monospace;
-            resize: vertical;
-            min-height: 80px;
+            width: 100%; background: #0f0f14; border: 1px solid var(--border); color: var(--text);
+            padding: 10px; border-radius: 6px; font-family: monospace; resize: vertical; min-height: 60px;
         }
 
-        .btn-primary { 
-            background: var(--accent); 
-            color: white; 
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.2s;
-        }
-        .btn-primary:hover { background: var(--accent-hover); }
-
-        /* Grid de Cards */
-        .char-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 20px;
-        }
+        /* GRID */
+        .char-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 25px; }
 
         .card {
-            background: var(--bg-panel);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            background: var(--bg-panel); border-radius: 12px; border: 1px solid var(--border);
+            overflow: hidden; position: relative; transition: all 0.3s ease;
         }
 
-        /* Cabeçalho do Card */
+        /* ESTADOS DO CARD */
+        .card.active-turn {
+            border: 2px solid var(--active-turn); box-shadow: 0 0 25px rgba(0, 255, 136, 0.2); transform: scale(1.02); z-index: 10;
+        }
+        .card.active-turn .card-header { background: linear-gradient(to right, rgba(0, 255, 136, 0.2), transparent); }
+
+        .card.dead {
+            filter: grayscale(1) brightness(0.6); opacity: 0.7; border-color: #333; pointer-events: none;
+        }
+        .card.dead .delete-btn { pointer-events: all; } /* Permitir deletar morto */
+        
+        .dead-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2rem; font-weight: 900; color: var(--danger);
+            transform: rotate(-15deg); text-shadow: 2px 2px 0 #000;
+            opacity: 0; pointer-events: none; z-index: 20;
+        }
+        .card.dead .dead-overlay { opacity: 1; }
+
         .card-header {
-            padding: 15px 20px;
-            background: linear-gradient(to right, rgba(130, 87, 230, 0.15), transparent);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 15px 20px; background: linear-gradient(to right, rgba(130, 87, 230, 0.15), transparent);
+            border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;
+        }
+        .char-name { font-size: 1.1rem; font-weight: 900; color: #fff; text-transform: uppercase; }
+
+        /* INICIATIVA */
+        .init-box {
+            display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.3);
+            padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border);
+        }
+        .init-input {
+            width: 30px; background: transparent; border: none; color: var(--accent);
+            font-weight: 900; text-align: center; font-size: 1rem;
         }
 
-        .char-name { 
-            font-size: 1.2rem; 
-            font-weight: 900; 
-            color: #fff; 
-            text-transform: uppercase; 
-        }
-
-        /* Grid de Atributos (NOVO) */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 2px;
-            background: #000;
-            padding: 2px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
+        /* ATRIBUTOS */
+        .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: #2d2d3a; padding-bottom: 1px; }
         .stat-box {
-            background: var(--highlight);
-            text-align: center;
-            padding: 8px 2px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            background: var(--highlight); text-align: center; padding: 10px 2px; cursor: pointer; transition: 0.2s; position: relative;
         }
-        
-        /* Destaque para Defesa */
-        .stat-box.def { background: rgba(130, 87, 230, 0.15); }
+        .stat-box:hover { background: #323242; color: white; }
+        .stat-box label { font-size: 0.65rem; color: var(--text-muted); font-weight: 700; display: block; }
+        .stat-box span { font-size: 1.1rem; font-weight: 800; color: #fff; }
 
-        .stat-box label { 
-            font-size: 0.6rem; 
-            color: var(--text-muted); 
-            font-weight: 700; 
-            margin-bottom: 2px;
-        }
-        .stat-box span { 
-            font-size: 1rem; 
-            font-weight: 800; 
-            color: #fff; 
-        }
-        .stat-box.def span { color: var(--accent); }
-
-        /* Barras de Vida/PE */
+        /* BARRAS */
         .bars-container { padding: 15px 20px; }
-        .stat-row { margin-bottom: 15px; }
-        
-        .stat-label { 
-            display: flex; 
-            justify-content: space-between; 
-            font-weight: 800; 
-            font-size: 0.75rem; 
-            margin-bottom: 6px; 
-            text-transform: uppercase; 
-        }
-        
-        .bar-bg { 
-            background: #0a0a0f; 
-            height: 10px; 
-            border-radius: 5px; 
-            overflow: hidden; 
-            border: 1px solid #333; 
-        }
+        .stat-row { margin-bottom: 12px; }
+        .stat-label { display: flex; justify-content: space-between; font-weight: 800; font-size: 0.75rem; margin-bottom: 4px; text-transform: uppercase; }
+        .bar-bg { background: #0a0a0f; height: 8px; border-radius: 4px; overflow: hidden; border: 1px solid #333; }
         .bar-fill { height: 100%; transition: width 0.3s ease; }
         .hp-fill { background: var(--danger); }
         .pe-fill { background: var(--pe-color); }
 
-        /* Botões de Controle (+/-) */
-        .controls { 
-            display: flex; 
-            gap: 4px; 
-            margin-top: 8px; 
-        }
-        .ctrl-btn { 
-            flex: 1;
-            background: var(--highlight); 
-            border: none; 
-            color: var(--text-muted); 
-            padding: 6px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-weight: 700; 
-            font-size: 0.7rem; 
-            transition: 0.2s;
-        }
+        .controls { display: flex; gap: 4px; margin-top: 6px; }
+        .ctrl-btn { flex: 1; background: var(--highlight); border: none; color: var(--text-muted); padding: 5px; border-radius: 3px; cursor: pointer; font-weight: 700; font-size: 0.7rem; }
         .ctrl-btn:hover { background: var(--border); color: #fff; }
-        .ctrl-btn.heal:hover { background: rgba(4, 211, 97, 0.2); color: var(--success); }
-        .ctrl-btn.dmg:hover { background: rgba(232, 63, 91, 0.2); color: var(--danger); }
 
-        /* Detalhes */
+        /* DETALHES & HABILIDADES */
         .btn-expand {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-top: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 0.7rem;
-            text-transform: uppercase;
+            width: 100%; background: transparent; border: none; border-top: 1px solid var(--border);
+            color: var(--text-muted); padding: 8px; font-weight: 700; cursor: pointer; font-size: 0.7rem; text-transform: uppercase;
         }
-        .btn-expand:hover { background: rgba(255,255,255,0.03); color: var(--accent); }
+        .btn-expand:hover { color: var(--accent); background: rgba(255,255,255,0.02); }
 
         .details-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            background: rgba(0,0,0,0.2);
-            padding: 0 20px;
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+            background: rgba(0,0,0,0.2); padding: 0 20px;
         }
-        .details-content.open { 
-            max-height: 800px; 
-            padding-top: 20px; 
-            padding-bottom: 20px; 
-            overflow-y: auto; 
-        }
+        .details-content.open { max-height: 800px; padding-top: 15px; padding-bottom: 15px; overflow-y: auto; }
 
-        .detail-block { margin-bottom: 15px; }
-        .detail-header { 
-            color: var(--accent); 
-            font-size: 0.7rem; 
-            font-weight: 900; 
-            margin-bottom: 5px; 
-            letter-spacing: 1px;
+        .detail-block { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .detail-header { color: var(--accent); font-size: 0.7rem; font-weight: 900; letter-spacing: 1px; margin-bottom: 8px; }
+
+        /* ESTILO DOS ITENS */
+        .items-container {
+            display: flex; flex-wrap: wrap; gap: 6px;
         }
-        .detail-text { 
-            font-size: 0.8rem; 
-            color: #ccc; 
-            line-height: 1.4; 
-            white-space: pre-wrap; 
+        .item-tag {
+            background: rgba(255,255,255,0.05); border: 1px solid #333;
+            padding: 5px 8px; border-radius: 4px; font-size: 0.75rem; color: #ddd;
+            display: inline-block;
         }
+        .item-tag:hover { border-color: var(--text-muted); background: rgba(255,255,255,0.08); }
+
+        /* Botões de Perícia */
+        .skill-btn {
+            background: #222; border: 1px solid #444; color: #ddd; padding: 5px 10px;
+            border-radius: 4px; font-size: 0.8rem; cursor: pointer; margin: 2px; transition: 0.2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .skill-btn:hover { border-color: var(--success); color: var(--success); transform: translateY(-2px); }
+        .skill-attr-tag { font-size: 0.6rem; color: #666; font-weight: bold; background: #000; padding: 1px 4px; border-radius: 3px; }
+        .skill-val { font-weight: bold; color: var(--success); }
+
+        /* Habilidades */
+        .hab-card {
+            background: rgba(255,255,255,0.03); border-radius: 6px; padding: 10px; margin-bottom: 8px;
+        }
+        .hab-title { font-weight: bold; color: white; font-size: 0.9rem; margin-bottom: 5px; }
+        .hab-desc { font-size: 0.8rem; color: #aaa; margin-bottom: 8px; line-height: 1.3; }
+        .use-btn {
+            background: var(--accent); border: none; color: white; padding: 6px 12px;
+            border-radius: 4px; font-weight: bold; font-size: 0.7rem; cursor: pointer; width: 100%;
+            display: flex; justify-content: space-between;
+        }
+        .use-btn:hover { background: var(--accent-hover); }
+        .use-btn:disabled { background: #444; cursor: not-allowed; opacity: 0.5; }
 
         .delete-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: transparent;
-            color: #444;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            z-index: 10;
+            position: absolute; top: 10px; right: 10px; background: transparent; color: #444; border: none;
+            font-size: 1.2rem; cursor: pointer; z-index: 30;
         }
         .delete-btn:hover { color: var(--danger); }
 
+        /* MODAL DE DADOS */
+        .dice-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center; z-index: 100;
+        }
+        .dice-overlay.show { display: flex; }
+        .dice-modal {
+            background: var(--bg-panel); border: 2px solid var(--accent); border-radius: 16px;
+            padding: 30px; width: 90%; max-width: 450px; text-align: center;
+            box-shadow: 0 0 50px rgba(130, 87, 230, 0.3);
+            animation: popIn 0.3s ease;
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; }}
+
+        .dice-val-big { font-size: 4rem; font-weight: 900; color: var(--success); text-shadow: 0 0 20px rgba(4, 211, 97, 0.4); margin: 10px 0; }
+        .dice-detail { font-size: 0.9rem; color: #aaa; margin-top: 5px; margin-bottom: 20px; font-family: monospace; word-spacing: -2px; }
+        .dice-formula { font-size: 1.1rem; color: #fff; font-weight: bold; background: #222; padding: 5px 10px; border-radius: 4px; display: inline-block; }
+        
+        .rolls-display {
+            color: var(--text-muted); font-size: 0.85rem; margin-bottom: 5px;
+        }
+        .rolls-display span.selected { color: var(--success); font-weight: bold; text-decoration: underline; }
+        .rolls-display span.dropped { opacity: 0.5; }
+
+        .close-modal {
+            margin-top: 10px; background: var(--highlight); border: none; padding: 10px 30px;
+            color: white; border-radius: 20px; cursor: pointer; font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="title">Painel Tático</div>
+        
+        <div class="header-area">
+            <div class="top-row">
+                <div class="title">VTT Tático 2.2</div>
+                <div class="turn-display">
+                    <div class="turn-label">RODADA</div>
+                    <div class="turn-number" id="roundDisplay">1</div>
+                </div>
+            </div>
+
+            <div class="combat-controls">
+                <button class="btn-control btn-sort" onclick="sortInitiative()">⚡ Ordenar</button>
+                <button class="btn-control btn-start" onclick="startCombat()">▶ Iniciar</button>
+                <button class="btn-control btn-next" onclick="nextTurn()">Próximo ⏭</button>
+                <button class="btn-control btn-reset" onclick="resetRound()">↺ Reset</button>
+            </div>
+        </div>
 
         <div class="import-section">
-            <textarea id="importText" placeholder="Cole a ficha aqui..."></textarea>
-            <button class="btn-primary" onclick="importCharacter()">+ Adicionar ao Combate</button>
+            <details>
+                <summary>+ Adicionar Personagem</summary>
+                <textarea id="importText" placeholder="Cole o texto da ficha aqui..."></textarea>
+                <button class="btn-control btn-next" style="width:100%; justify-content: center; margin-top:10px;" onclick="importCharacter()">PROCESSAR E ADICIONAR</button>
+            </details>
         </div>
 
         <div class="char-grid" id="charGrid"></div>
     </div>
 
-    <script>
-        let characters = JSON.parse(localStorage.getItem('tacticalTrackerData')) || [];
+    <div class="dice-overlay" id="diceModal" onclick="closeDice(event)">
+        <div class="dice-modal">
+            <div style="font-weight:bold; color:var(--accent); text-transform:uppercase; letter-spacing:1px;" id="diceTitle">TESTE</div>
+            
+            <div class="dice-formula" id="diceFormula">3d20 + 5</div>
+            <div class="dice-val-big" id="diceFinal">20</div>
+            
+            <div class="rolls-display" id="diceRolls">Rolagem: [5, 12, 20]</div>
+            <div class="dice-detail" id="diceCalc">20 (Dado) + 5 (Bônus)</div>
+            
+            <button class="close-modal" onclick="document.getElementById('diceModal').classList.remove('show')">FECHAR</button>
+        </div>
+    </div>
 
-        function save() {
-            localStorage.setItem('tacticalTrackerData', JSON.stringify(characters));
+    <script>
+        // --- BASE DE DADOS DE PERÍCIAS ---
+        const SKILL_DB = [
+            { nome: "Acrobacia", attr: "AGI" }, { nome: "Adestramento", attr: "PRE" },
+            { nome: "Artes", attr: "PRE" }, { nome: "Atletismo", attr: "FOR" },
+            { nome: "Atualidades", attr: "INT" }, { nome: "Ciências", attr: "INT" },
+            { nome: "Crime", attr: "AGI" }, { nome: "Diplomacia", attr: "PRE" },
+            { nome: "Enganação", attr: "PRE" }, { nome: "Engenharia", attr: "INT" },
+            { nome: "Fortitude", attr: "VIG" }, { nome: "Furtividade", attr: "AGI" },
+            { nome: "Iniciativa", attr: "AGI" }, { nome: "Intimidação", attr: "PRE" },
+            { nome: "Intuição", attr: "PRE" }, { nome: "Investigação", attr: "INT" },
+            { nome: "Luta", attr: "FOR" }, { nome: "Medicina", attr: "INT" },
+            { nome: "Percepção", attr: "PRE" }, { nome: "Pilotagem", attr: "AGI" },
+            { nome: "Pontaria", attr: "AGI" }, { nome: "Reflexos", attr: "AGI" },
+            { nome: "Religião", attr: "PRE" }, { nome: "Sobrevivência", attr: "INT" },
+            { nome: "Tática", attr: "INT" }, { nome: "Tecnologia", attr: "INT" },
+            { nome: "Vontade", attr: "PRE" }
+        ];
+
+        const ATTR_MAP = { "FOR": "forca", "AGI": "agi", "INT": "int", "PRE": "pre", "VIG": "vig" };
+
+        let characters = JSON.parse(localStorage.getItem('vtt2Data')) || [];
+        let currentRound = parseInt(localStorage.getItem('vtt2Round')) || 1;
+        let activeCharIndex = localStorage.getItem('vtt2ActiveIdx');
+        
+        if(activeCharIndex !== null && activeCharIndex !== "null") activeCharIndex = parseInt(activeCharIndex);
+        else activeCharIndex = null;
+        
+        updateRoundDisplay();
+
+        // --- SISTEMA ---
+        function updateRoundDisplay() { document.getElementById('roundDisplay').innerText = currentRound; }
+
+        function saveState() {
+            localStorage.setItem('vtt2Data', JSON.stringify(characters));
+            localStorage.setItem('vtt2Round', currentRound);
+            localStorage.setItem('vtt2ActiveIdx', activeCharIndex);
+            updateRoundDisplay();
             render();
         }
 
-        // Função auxiliar para capturar seções inteiras
+        function startCombat() {
+            if (characters.length === 0) return alert("Mesa vazia!");
+            currentRound = 1;
+            activeCharIndex = -1; 
+            nextTurn(); 
+        }
+
+        function nextTurn() {
+            if (activeCharIndex === null) return alert("Inicie o combate primeiro.");
+            let attempts = 0;
+            const total = characters.length;
+            do {
+                activeCharIndex++;
+                if (activeCharIndex >= total) {
+                    activeCharIndex = 0;
+                    currentRound++;
+                }
+                attempts++;
+            } while (characters[activeCharIndex].currentHP <= 0 && attempts <= total);
+
+            if (attempts > total) {
+                alert("Todos estão derrotados!");
+                activeCharIndex = null;
+            }
+            saveState();
+        }
+
+        function resetRound() {
+            if(confirm("Reiniciar combate?")) {
+                currentRound = 1;
+                activeCharIndex = null;
+                saveState();
+            }
+        }
+
+        function sortInitiative() {
+            characters.sort((a, b) => (b.initiative || 0) - (a.initiative || 0));
+            activeCharIndex = null; 
+            saveState();
+        }
+
+        // --- DADOS ---
+        function rollSkill(charId, skillName, bonus) {
+            const char = characters.find(c => c.id === charId);
+            const skillInfo = SKILL_DB.find(s => s.nome.toLowerCase() === skillName.toLowerCase());
+            let attrKey = 'agi'; 
+            let attrName = '???';
+            if (skillInfo) { attrName = skillInfo.attr; attrKey = ATTR_MAP[skillInfo.attr]; }
+            const attrVal = char.stats[attrKey] || 0;
+            rollDiceSystem(`TESTE DE ${skillName.toUpperCase()}`, attrVal, bonus, attrName);
+        }
+
+        function rollAttribute(charId, attrKey) {
+            const char = characters.find(c => c.id === charId);
+            const val = char.stats[attrKey];
+            let displayName = "ATRIBUTO";
+            for(let [key, value] of Object.entries(ATTR_MAP)) { if(value === attrKey) displayName = key; }
+            rollDiceSystem(`TESTE DE ${displayName}`, val, 0, displayName);
+        }
+
+        function rollDiceSystem(title, diceCount, modifier, attrName) {
+            let rolls = [];
+            let finalDie = 0;
+            if (diceCount <= 0) {
+                rolls.push(Math.floor(Math.random() * 20) + 1);
+                rolls.push(Math.floor(Math.random() * 20) + 1);
+                finalDie = Math.min(...rolls);
+            } else {
+                for(let i=0; i<diceCount; i++) { rolls.push(Math.floor(Math.random() * 20) + 1); }
+                finalDie = Math.max(...rolls);
+            }
+            const total = finalDie + modifier;
+
+            document.getElementById('diceTitle').innerText = title;
+            const diceIcon = diceCount <= 0 ? "2d20↓" : `${diceCount}d20`;
+            const modText = modifier >= 0 ? `+ ${modifier}` : `- ${Math.abs(modifier)}`;
+            document.getElementById('diceFormula').innerText = `${attrName} (${diceIcon}) ${modifier !== 0 ? modText : ''}`;
+
+            let rollsHtml = rolls.map(r => r === finalDie ? `<span class="selected">${r}</span>` : `<span class="dropped">${r}</span>`).join(', ');
+            document.getElementById('diceRolls').innerHTML = `Dados: [ ${rollsHtml} ]`;
+            document.getElementById('diceFinal').innerText = total;
+            document.getElementById('diceCalc').innerText = `${finalDie} (Dado) ${modifier >=0 ? '+' : ''} ${modifier} (Bônus)`;
+            document.getElementById('diceModal').classList.add('show');
+        }
+
+        function useAbility(charId, habIndex) {
+            const char = characters.find(c => c.id === charId);
+            const hab = char.parsedHabs[habIndex];
+            if (hab.cost > 0) {
+                if (char.currentPE < hab.cost) return alert("PE Insuficiente!");
+                char.currentPE -= hab.cost;
+            }
+            if (hab.linkedSkill) {
+                const bonus = char.parsedSkills[hab.linkedSkill] || 0;
+                rollSkill(charId, hab.linkedSkill, bonus);
+            } else {
+                alert(`${char.name} usou ${hab.name}!\nGastou ${hab.cost} PE.`);
+            }
+            saveState();
+        }
+
+        // --- IMPORTAÇÃO ---
+        function cleanText(text) { return text ? text.replace(/_{2,}/g, '').trim() : ""; }
+
+        function parseSkills(text) {
+            const skillMap = {};
+            const regex = /([a-zA-Zçãõâêîôû\s]+)(?:\:)?\s*\+(\d+)/g;
+            let match;
+            while ((match = regex.exec(text)) !== null) {
+                const name = match[1].trim();
+                const val = parseInt(match[2]);
+                if(name && !isNaN(val)) skillMap[name] = val;
+            }
+            return skillMap;
+        }
+
+        function parseAbilities(text, skillsMap) {
+            if (!text) return [];
+            const rawHabs = text.split(/\n\n|(?=\n[A-Z][a-zçãõ\s]+:)/); 
+            return rawHabs.map(h => {
+                const clean = h.trim();
+                if(!clean) return null;
+                const nameMatch = clean.match(/^([^:]+):/);
+                const name = nameMatch ? nameMatch[1].trim() : "Habilidade";
+                const costMatch = clean.match(/Gasta\s*(\d+)\s*PE/i) || clean.match(/Custo[:\s]*(\d+)\s*PE/i);
+                const cost = costMatch ? parseInt(costMatch[1]) : 0;
+                let linkedSkill = null;
+                for (let dbSkill of SKILL_DB) {
+                     if (clean.toLowerCase().includes(dbSkill.nome.toLowerCase())) {
+                        linkedSkill = dbSkill.nome; break;
+                     }
+                }
+                return { name, text: clean, cost, linkedSkill };
+            }).filter(h => h !== null);
+        }
+
         function getSection(text, startAnchor, endAnchors) {
             const startIdx = text.search(new RegExp(startAnchor, "i"));
             if (startIdx === -1) return "";
-
             let sectionContent = text.substring(startIdx + startAnchor.length);
             let closestEnd = sectionContent.length;
-
             endAnchors.forEach(anchor => {
                 const endIdx = sectionContent.search(new RegExp(anchor, "i"));
-                if (endIdx !== -1 && endIdx < closestEnd) {
-                    closestEnd = endIdx;
-                }
+                if (endIdx !== -1 && endIdx < closestEnd) closestEnd = endIdx;
             });
-
-            return sectionContent.substring(0, closestEnd).replace(/_{2,}/g, '').trim();
+            return cleanText(sectionContent.substring(0, closestEnd));
         }
 
         function importCharacter() {
             const raw = document.getElementById('importText').value;
             if (!raw.trim()) return;
-
-            // Extração de Dados Principais
             const name = raw.split('\n')[0].split('(')[0].trim();
             const vitMatch = raw.match(/Vitalidade:\s*(\d+)/i);
             const peMatch = raw.match(/Pontos de Esforço \(PE\):\s*(\d+)/i);
             const defMatch = raw.match(/Defesa:\s*(\d+)/i);
 
-            // Extração de Todos os Atributos
-            const forca = raw.match(/Força:\s*(\d+)/i)?.[1] || "0";
-            const agi = raw.match(/Agilidade:\s*(\d+)/i)?.[1] || "0";
-            const int = raw.match(/Intelecto:\s*(\d+)/i)?.[1] || "0";
-            const pre = raw.match(/Presença:\s*(\d+)/i)?.[1] || "0";
-            const vig = raw.match(/Vigor:\s*(\d+)/i)?.[1] || "0";
+            const stats = {
+                forca: parseInt(raw.match(/Força:\s*(\d+)/i)?.[1] || 0),
+                agi: parseInt(raw.match(/Agilidade:\s*(\d+)/i)?.[1] || 0),
+                int: parseInt(raw.match(/Intelecto:\s*(\d+)/i)?.[1] || 0),
+                pre: parseInt(raw.match(/Presença:\s*(\d+)/i)?.[1] || 0),
+                vig: parseInt(raw.match(/Vigor:\s*(\d+)/i)?.[1] || 0),
+                def: defMatch ? defMatch[1] : '10'
+            };
 
-            // Seções de Texto
-            const itens = getSection(raw, "Itens", ["Pericias:", "Perícias:", "Habilidades", "Condição:"]);
-            const pericias = getSection(raw, "Perícias:|Pericias:", ["Habilidades", "Condição:"]);
-            const habs = getSection(raw, "Habilidades", ["Condição:"]);
-            const condicao = getSection(raw, "Condição:", ["---"]);
-
+            const skillsText = getSection(raw, "Perícias:|Pericias:", ["Habilidades", "Condição:"]);
+            const habsText = getSection(raw, "Habilidades", ["Condição:"]);
+            
             const newChar = {
                 id: Date.now(),
-                name: name,
+                name,
+                initiative: 0,
                 maxHP: vitMatch ? parseInt(vitMatch[1]) : 10,
                 currentHP: vitMatch ? parseInt(vitMatch[1]) : 10,
                 maxPE: peMatch ? parseInt(peMatch[1]) : 5,
                 currentPE: peMatch ? parseInt(peMatch[1]) : 5,
-                stats: { forca, agi, int, pre, vig, def: defMatch ? defMatch[1] : '10' },
-                details: { itens, pericias, habs, condicao }
+                stats,
+                parsedSkills: parseSkills(skillsText),
+                parsedHabs: parseAbilities(habsText, parseSkills(skillsText)),
+                rawDetails: {
+                    itens: getSection(raw, "Itens", ["Pericias:", "Habilidades"]),
+                    condicao: getSection(raw, "Condição:", ["---"])
+                }
             };
-
             characters.push(newChar);
             document.getElementById('importText').value = '';
-            save();
+            saveState();
         }
 
         function updateStat(id, type, amount) {
@@ -337,86 +507,100 @@
             if (!char) return;
             if (type === 'hp') char.currentHP = Math.min(char.maxHP, Math.max(0, char.currentHP + amount));
             else char.currentPE = Math.min(char.maxPE, Math.max(0, char.currentPE + amount));
-            save();
+            saveState();
         }
+        function updateInit(id, val) { const c = characters.find(x => x.id === id); if(c){c.initiative=parseInt(val); saveState();} }
+        function deleteChar(id) { if(confirm("Remover?")) { characters = characters.filter(c => c.id !== id); if(activeCharIndex>=characters.length) activeCharIndex=0; saveState(); } }
+        function closeDice(e) { if(e.target.id === 'diceModal') document.getElementById('diceModal').classList.remove('show'); }
+        function toggleDetails(id) { document.getElementById(`details-${id}`).classList.toggle('open'); }
 
-        function deleteChar(id) {
-            if(confirm("Apagar personagem?")) {
-                characters = characters.filter(c => c.id !== id);
-                save();
-            }
-        }
-
-        function toggleDetails(id) {
-            document.getElementById(`details-${id}`).classList.toggle('open');
-        }
-
+        // --- RENDER ---
         function render() {
             const grid = document.getElementById('charGrid');
-            grid.innerHTML = characters.map(char => {
+            grid.innerHTML = characters.map((char, index) => {
                 const hpPerc = Math.max(0, (char.currentHP / char.maxHP) * 100);
                 const pePerc = Math.max(0, (char.currentPE / char.maxPE) * 100);
+                const isDead = char.currentHP <= 0;
+                const isActive = (activeCharIndex === index);
+
+                // PROCESSAR ITENS (Transforma texto em tags)
+                let itemsHtml = '<span style="color:#666; font-size:0.8rem;">Nenhum item.</span>';
+                if(char.rawDetails.itens) {
+                    // Separa por quebra de linha OU vírgula
+                    const itemsList = char.rawDetails.itens.split(/[\n,]+/).map(i => i.trim()).filter(i => i);
+                    if(itemsList.length > 0) {
+                        itemsHtml = `<div class="items-container">${itemsList.map(i => `<span class="item-tag">${i}</span>`).join('')}</div>`;
+                    }
+                }
+
+                let skillsHtml = '';
+                for (const [key, val] of Object.entries(char.parsedSkills)) {
+                    const skillInfo = SKILL_DB.find(s => s.nome.toLowerCase() === key.toLowerCase());
+                    const attrTag = skillInfo ? skillInfo.attr : '?';
+                    skillsHtml += `<button class="skill-btn" onclick="rollSkill(${char.id}, '${key}', ${val})">${key} <span class="skill-attr-tag">${attrTag}</span> <span class="skill-val">+${val}</span></button>`;
+                }
+
+                let habsHtml = char.parsedHabs.map((hab, hIdx) => {
+                    const btnLabel = hab.linkedSkill ? `USAR & TESTAR ${hab.linkedSkill.toUpperCase()}` : 'USAR HABILIDADE';
+                    return `
+                    <div class="hab-card">
+                        <div class="hab-title">${hab.name}</div>
+                        <div class="hab-desc">${hab.text}</div>
+                        ${hab.cost > 0 ? `<button class="use-btn" onclick="useAbility(${char.id}, ${hIdx})" ${char.currentPE < hab.cost || isDead ? 'disabled' : ''}><span>${btnLabel}</span><span>-${hab.cost} PE</span></button>` : ''}
+                    </div>`;
+                }).join('');
 
                 return `
-                    <div class="card">
+                    <div class="card ${isDead ? 'dead' : ''} ${isActive ? 'active-turn' : ''}">
+                        <div class="dead-overlay">DERROTADO</div>
                         <button class="delete-btn" onclick="deleteChar(${char.id})">&times;</button>
                         
                         <div class="card-header">
-                            <span class="char-name">${char.name}</span>
+                            <div style="display:flex; flex-direction:column;">
+                                <span class="char-name">${char.name}</span>
+                                ${isActive ? '<span style="font-size:0.7rem; color:var(--active-turn);">🔴 TURNO ATUAL</span>' : ''}
+                            </div>
+                            <div class="init-box">
+                                <label>INI</label>
+                                <input type="number" class="init-input" value="${char.initiative}" onchange="updateInit(${char.id}, this.value)">
+                            </div>
                         </div>
 
                         <div class="stats-grid">
-                            <div class="stat-box"><label>AGI</label><span>${char.stats.agi}</span></div>
-                            <div class="stat-box"><label>FOR</label><span>${char.stats.forca}</span></div>
-                            <div class="stat-box"><label>INT</label><span>${char.stats.int}</span></div>
-                            <div class="stat-box"><label>PRE</label><span>${char.stats.pre}</span></div>
-                            <div class="stat-box"><label>VIG</label><span>${char.stats.vig}</span></div>
-                            <div class="stat-box def"><label>DEF</label><span>${char.stats.def}</span></div>
+                            ${Object.entries(char.stats).map(([key, val]) => `<div class="stat-box ${key==='def'?'def':''}" onclick="${key!=='def' ? `rollAttribute(${char.id}, '${key}')` : ''}"><label>${key.substring(0,3).toUpperCase()}</label><span>${val}</span></div>`).join('')}
                         </div>
 
                         <div class="bars-container">
                             <div class="stat-row">
-                                <div class="stat-label">
-                                    <span style="color:#ff5555">PV</span>
-                                    <span>${char.currentHP}/${char.maxHP}</span>
-                                </div>
+                                <div class="stat-label"><span>PV</span><span>${char.currentHP}/${char.maxHP}</span></div>
                                 <div class="bar-bg"><div class="bar-fill hp-fill" style="width: ${hpPerc}%"></div></div>
-                                <div class="controls">
-                                    <button class="ctrl-btn dmg" onclick="updateStat(${char.id}, 'hp', -10)">-10</button>
-                                    <button class="ctrl-btn dmg" onclick="updateStat(${char.id}, 'hp', -1)">-1</button>
-                                    <button class="ctrl-btn heal" onclick="updateStat(${char.id}, 'hp', 1)">+1</button>
-                                    <button class="ctrl-btn heal" onclick="updateStat(${char.id}, 'hp', 10)">+10</button>
-                                </div>
+                                <div class="controls"><button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', -10)">-10</button><button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', -1)">-1</button><button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', 1)">+1</button><button class="ctrl-btn" onclick="updateStat(${char.id}, 'hp', 5)">+5</button></div>
                             </div>
-
-                            <div class="stat-row" style="margin-bottom:0">
-                                <div class="stat-label">
-                                    <span style="color:var(--pe-color)">PE</span>
-                                    <span>${char.currentPE}/${char.maxPE}</span>
-                                </div>
+                            <div class="stat-row">
+                                <div class="stat-label"><span>PE</span><span>${char.currentPE}/${char.maxPE}</span></div>
                                 <div class="bar-bg"><div class="bar-fill pe-fill" style="width: ${pePerc}%"></div></div>
-                                <div class="controls">
-                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', -3)">-3</button>
-                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', -1)">-1</button>
-                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', 1)">+1</button>
-                                    <button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', 5)">+5</button>
-                                </div>
+                                <div class="controls"><button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', -1)">-1</button><button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', 1)">+1</button></div>
                             </div>
                         </div>
 
-                        <button class="btn-expand" onclick="toggleDetails(${char.id})">Inventário e Habilidades</button>
+                        <button class="btn-expand" onclick="toggleDetails(${char.id})">VER FICHÁRIO COMPLETO</button>
                         
                         <div class="details-content" id="details-${char.id}">
-                            ${char.details.itens ? `<div class="detail-block"><div class="detail-header">ITENS</div><div class="detail-text">${char.details.itens}</div></div>` : ''}
-                            ${char.details.pericias ? `<div class="detail-block"><div class="detail-header">PERÍCIAS</div><div class="detail-text">${char.details.pericias}</div></div>` : ''}
-                            ${char.details.habs ? `<div class="detail-block"><div class="detail-header">HABILIDADES</div><div class="detail-text">${char.details.habs}</div></div>` : ''}
-                            ${char.details.condicao ? `<div class="detail-block"><div class="detail-header">CONDIÇÃO</div><div class="detail-text">${char.details.condicao}</div></div>` : ''}
+                            <div class="detail-block">
+                                <div class="detail-header">EQUIPAMENTO & INVENTÁRIO</div>
+                                ${itemsHtml}
+                            </div>
+
+                            ${skillsHtml ? `<div class="detail-block"><div class="detail-header">PERÍCIAS</div><div style="display:flex; flex-wrap:wrap;">${skillsHtml}</div></div>` : ''}
+                            
+                            ${habsHtml ? `<div class="detail-block"><div class="detail-header">HABILIDADES</div>${habsHtml}</div>` : ''}
+
+                            ${char.rawDetails.condicao ? `<div class="detail-block"><div class="detail-header">CONDIÇÃO</div><div style="font-size:0.8rem; color:#ccc;">${char.rawDetails.condicao}</div></div>` : ''}
                         </div>
                     </div>
                 `;
             }).join('');
         }
-
         render();
     </script>
 </body>
