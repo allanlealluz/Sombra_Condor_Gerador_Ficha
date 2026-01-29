@@ -619,7 +619,7 @@
             const maxCarga = 5 + for_ * 2 + Math.floor(atletismo / 5) * 2;
             
             get('def').textContent = 10 + agi + bonusPerc;
-            get('pv').textContent = 10 + vig * 3 + expEf + Math.floor(expEf / 5) + fortitude;
+            get('pv').textContent = 10 + vig * 5 + expEf + Math.floor(expEf / 5) + fortitude;
             get('pe').textContent = (for_ + pre + vig) * 2 + Math.floor(expEf / 3) + bonusVont+bonusReligiao;
             get('carga').textContent = maxCarga;
             get('desloc').textContent = agi === 0 ? 1 : agi * 3;
