@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sombra do Condor - Database System</title>
+    <title>Sombra do Condor - Story Engine</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Merriweather:wght@300;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #0a0a0f;
@@ -17,6 +17,8 @@
             --text-muted: #a8a8b3;
             --border: #2d2d3a;
             --success: #04d361;
+            --danger: #e83f5b;
+            --warning: #ffbf00;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,78 +33,96 @@
             overflow: hidden;
         }
 
-        /* HEADER / TOOLBAR */
-        .top-bar {
-            height: 60px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
-        }
-        .file-controls { display: flex; gap: 10px; }
-        .logo { font-weight: 900; color: var(--accent); letter-spacing: 1px; font-size: 1.2rem; }
-
-        /* LAYOUT */
-        .workspace { display: flex; flex: 1; overflow: hidden; }
-        
-        .sidebar {
-            width: 300px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column;
-        }
-        .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border); }
-        .tab-btn {
-            flex: 1; background: transparent; border: none; color: var(--text-muted);
-            padding: 15px; cursor: pointer; font-weight: bold; border-bottom: 2px solid transparent;
-        }
-        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(130,87,230,0.05); }
-
-        .tree-container { flex: 1; overflow-y: auto; padding: 10px; }
-
-        .main-view { flex: 1; padding: 30px; overflow-y: auto; background: radial-gradient(circle at top right, #1a1a24 0%, var(--bg-dark) 40%); }
-
-        /* UI ELEMENTS */
-        .btn { padding: 8px 16px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; font-size: 0.8rem; display:inline-flex; align-items:center; gap:5px; }
+        /* UTILS */
+        .btn { padding: 8px 16px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; font-size: 0.8rem; display:inline-flex; align-items:center; gap:5px; transition:0.2s;}
         .btn-primary { background: var(--accent); color: white; }
         .btn-primary:hover { background: var(--accent-hover); }
-        .btn-success { background: var(--success); color: #000; }
+        .btn-danger { background: rgba(232, 63, 91, 0.2); color: var(--danger); border: 1px solid var(--danger); }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
-        .btn-outline:hover { border-color: var(--text); color: var(--text); }
+        .btn-outline:hover { border-color: var(--text); color: var(--text); background: var(--border); }
         
         input, textarea, select {
             background: #0f0f14; border: 1px solid var(--border); color: var(--text);
             padding: 10px; border-radius: 4px; width: 100%; margin-bottom: 10px; font-family: 'Inter', sans-serif;
         }
+
+        /* LAYOUT */
+        .top-bar {
+            height: 50px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+        }
+        .workspace { display: flex; flex: 1; overflow: hidden; }
         
-        /* TREE VIEW (Recursivo) */
-        .tree-item { margin-left: 10px; border-left: 1px solid #333; }
+        .sidebar {
+            width: 280px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+        }
+        .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border); }
+        .tab-btn {
+            flex: 1; background: transparent; border: none; color: var(--text-muted);
+            padding: 12px; cursor: pointer; font-weight: bold; border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(130,87,230,0.05); }
+
+        .tree-container { flex: 1; overflow-y: auto; padding: 10px; }
+        
+        .main-view { flex: 1; padding: 0; overflow-y: hidden; position: relative; background: radial-gradient(circle at top right, #1a1a24 0%, var(--bg-dark) 40%); }
+        .scrollable-content { height: 100%; overflow-y: auto; padding: 30px; }
+
+        /* TREE VIEW */
+        .tree-item { margin-left: 12px; border-left: 1px solid #333; }
         .tree-content {
-            padding: 8px; display: flex; align-items: center; cursor: pointer; border-radius: 4px;
+            padding: 6px 10px; display: flex; align-items: center; cursor: pointer; border-radius: 4px; margin-bottom: 2px;
         }
         .tree-content:hover { background: #222; }
         .tree-content.active { background: var(--accent); color: white; }
-        .tree-toggle { width: 20px; text-align: center; color: #666; font-weight: bold; }
 
         /* CARDS & LISTS */
-        .detail-header { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-        .member-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 15px; }
         .member-card {
             background: var(--bg-panel); padding: 10px; border-radius: 8px; border: 1px solid var(--border);
             display: flex; gap: 10px; align-items: center; cursor: pointer; transition: 0.2s;
         }
-        .member-card:hover { border-color: var(--accent); }
-        .member-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #000; }
+        .member-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .member-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #000; border:1px solid #444; }
 
-        /* MODAL */
+        /* DOSSIER (Tela de Personagem) */
+        .dossier-header { display: flex; gap: 20px; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .dossier-avatar { width: 120px; height: 120px; border-radius: 8px; background: #222; object-fit: cover; border: 2px solid var(--accent); }
+        .dossier-info h1 { font-size: 2rem; color: #fff; }
+        .dossier-role { color: var(--accent); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .sheet-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid var(--border); font-family: monospace; white-space: pre-wrap; color: #a8a8b3; }
+
+        /* SCRIPT MODE */
+        .script-editor { width: 100%; height: calc(100vh - 150px); background: #111; color: #ddd; font-family: 'Merriweather', serif; font-size: 1.1rem; line-height: 1.6; padding: 20px; border: none; resize: none; outline: none; }
+        .script-reader { 
+            max-width: 800px; margin: 0 auto; background: #e1e1e6; color: #222; 
+            padding: 40px; min-height: 100%; font-family: 'Merriweather', serif; font-size: 1.1rem; line-height: 1.8;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+        }
+        .script-reader h1 { color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .script-reader p { margin-bottom: 15px; }
+
+        /* MISSION VERSUS */
+        .vs-container { display: flex; gap: 20px; margin-top: 20px; }
+        .vs-col { flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+        .vs-title { font-weight: 900; text-transform: uppercase; margin-bottom: 10px; text-align: center; padding-bottom:5px; border-bottom:1px solid #333; }
+        .vs-title.ally { color: var(--success); }
+        .vs-title.enemy { color: var(--danger); }
+
+        /* MODALS */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
             display: none; justify-content: center; align-items: center; z-index: 100;
         }
         .modal-overlay.open { display: flex; }
         .modal {
             background: var(--bg-panel); width: 600px; max-width: 95%; max-height: 90vh;
             border-radius: 12px; border: 1px solid var(--border); padding: 25px;
-            overflow-y: auto; box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
         }
 
-        /* LOADING */
         #loadingScreen {
             position: fixed; top:0; left:0; width:100%; height:100%; background:#0a0a0f; 
             z-index: 999; display: flex; flex-direction:column; justify-content:center; align-items:center;
@@ -112,16 +132,16 @@
 <body>
 
     <div id="loadingScreen">
-        <h2 style="color:var(--accent);">Carregando Sistema SQL...</h2>
-        <p style="color:#666;">Aguarde a inicialização do WebAssembly.</p>
+        <h2 style="color:var(--accent);">Carregando Motor...</h2>
+        <p style="color:#666;">Inicializando WebAssembly SQLite</p>
     </div>
 
     <div class="top-bar">
-        <div class="logo">Sombra do Condor <span style="font-size:0.7rem; color:#666;">v3.0 SQL</span></div>
-        <div class="file-controls">
+        <div style="font-weight:900; color:var(--accent);">SOMBRA DO CONDOR <span style="font-size:0.7em; color:#666;">v4.0</span></div>
+        <div style="display:flex; gap:10px;">
             <input type="file" id="dbInput" style="display:none;" onchange="loadDatabaseFromFile(this)">
-            <button class="btn btn-outline" onclick="document.getElementById('dbInput').click()">📂 Abrir Arquivo .sqlite</button>
-            <button class="btn btn-success" onclick="saveDatabaseToFile()">💾 Salvar Arquivo .sqlite</button>
+            <button class="btn btn-outline" onclick="document.getElementById('dbInput').click()">📂 Carregar</button>
+            <button class="btn btn-primary" onclick="saveDatabaseToFile()">💾 Salvar Tudo</button>
         </div>
     </div>
 
@@ -130,46 +150,42 @@
             <div class="sidebar-tabs">
                 <button class="tab-btn active" onclick="switchTab('groups')">Grupos</button>
                 <button class="tab-btn" onclick="switchTab('missions')">Missões</button>
+                <button class="tab-btn" onclick="switchTab('scripts')">Roteiros</button>
             </div>
             
-            <div id="treeGroups" class="tree-container">
-                <div style="padding:10px;">
-                    <button class="btn btn-outline" style="width:100%;" onclick="openNodeModal(null)">+ Novo Grupo Raiz</button>
-                </div>
+            <div id="tabGroups" class="tree-container">
+                <div style="padding:10px;"><button class="btn btn-outline" style="width:100%;" onclick="openNodeModal(null)">+ Grupo Raiz</button></div>
                 <div id="groupsRoot"></div>
             </div>
 
-            <div id="listMissions" class="tree-container" style="display:none;">
-                <div style="padding:10px;">
-                    <button class="btn btn-outline" style="width:100%;" onclick="openMissionModal()">+ Nova Missão</button>
-                </div>
+            <div id="tabMissions" class="tree-container" style="display:none;">
+                <div style="padding:10px;"><button class="btn btn-outline" style="width:100%;" onclick="openMissionModal()">+ Nova Missão</button></div>
                 <div id="missionsRoot"></div>
+            </div>
+
+            <div id="tabScripts" class="tree-container" style="display:none;">
+                <div style="padding:10px;"><button class="btn btn-outline" style="width:100%;" onclick="createNewScript()">+ Novo Roteiro</button></div>
+                <div id="scriptsRoot"></div>
             </div>
         </div>
 
-        <div class="main-view" id="mainView">
-            <div style="text-align:center; color:#444; margin-top:100px;">
-                Selecione um item na barra lateral para ver os detalhes.
+        <div class="main-view">
+            <div id="contentArea" class="scrollable-content">
+                <div style="text-align:center; margin-top:100px; color:#444;">
+                    Selecione um item na lateral para começar.
+                </div>
             </div>
         </div>
     </div>
 
     <div id="modalNode" class="modal-overlay">
         <div class="modal">
-            <h3>Gerenciar Grupo/Subgrupo</h3>
-            <input type="hidden" id="nodeId">
-            <input type="hidden" id="nodeParentId">
-            
-            <label>Nome</label>
-            <input type="text" id="nodeName">
-            
-            <label>Tipo (Ex: Corporação, Esquadrão, Seita)</label>
-            <input type="text" id="nodeType">
-            
-            <label>Descrição Detalhada</label>
-            <textarea id="nodeDesc" style="height:100px;"></textarea>
-
-            <div style="text-align:right;">
+            <h3>Grupo / Facção</h3>
+            <input type="hidden" id="nodeId"><input type="hidden" id="nodeParentId">
+            <label>Nome</label><input type="text" id="nodeName">
+            <label>Tipo</label><input type="text" id="nodeType" placeholder="Ex: Corporação, Gangue...">
+            <label>Descrição</label><textarea id="nodeDesc" style="height:80px;"></textarea>
+            <div style="text-align:right; margin-top:10px;">
                 <button class="btn btn-outline" onclick="closeModal('modalNode')">Cancelar</button>
                 <button class="btn btn-primary" onclick="saveNode()">Salvar</button>
             </div>
@@ -178,30 +194,17 @@
 
     <div id="modalMember" class="modal-overlay">
         <div class="modal">
-            <h3>Ficha do Membro</h3>
-            <input type="hidden" id="memId">
-            <input type="hidden" id="memNodeId">
-
+            <h3>Editar Membro</h3>
+            <input type="hidden" id="memId"><input type="hidden" id="memGroupId">
             <div style="display:flex; gap:10px;">
                 <div style="flex:1;"><label>Nome</label><input type="text" id="memName"></div>
-                <div style="width:150px;">
-                    <label>Função</label>
-                    <select id="memRole">
-                        <option value="Membro">Membro</option>
-                        <option value="Lider">Líder</option>
-                        <option value="Especialista">Especialista</option>
-                        <option value="NPC">NPC / Aliado</option>
-                    </select>
-                </div>
+                <div style="width:140px;"><label>Função</label><select id="memRole"><option>Membro</option><option>Lider</option><option>Especialista</option><option>NPC</option></select></div>
             </div>
-
-            <label>História / Notas</label>
-            <textarea id="memHistory"></textarea>
-
-            <label>Ficha Técnica (JSON ou Texto)</label>
-            <textarea id="memSheet" style="font-family:monospace; color:#8257e6;" placeholder='{"FOR": 3, "AGI": 2...}'></textarea>
-
-            <div style="text-align:right;">
+            <label>Link Imagem (URL)</label><input type="text" id="memImg" placeholder="https://...">
+            <label>História</label><textarea id="memHistory" style="height:80px;"></textarea>
+            <label>Ficha Técnica (JSON/Texto)</label><textarea id="memSheet" placeholder="FOR: 10..." style="font-family:monospace;"></textarea>
+            <div style="text-align:right; margin-top:10px;">
+                <button class="btn btn-danger" onclick="deleteMember()" style="float:left;">Excluir</button>
                 <button class="btn btn-outline" onclick="closeModal('modalMember')">Cancelar</button>
                 <button class="btn btn-primary" onclick="saveMember()">Salvar</button>
             </div>
@@ -210,23 +213,12 @@
 
     <div id="modalMission" class="modal-overlay">
         <div class="modal">
-            <h3>Detalhes da Missão</h3>
+            <h3>Dados da Missão</h3>
             <input type="hidden" id="missId">
-            <label>Título da Operação</label>
-            <input type="text" id="missTitle">
-            
-            <label>Status</label>
-            <select id="missStatus">
-                <option value="Planejamento">Planejamento</option>
-                <option value="Em Curso">Em Curso</option>
-                <option value="Concluída">Concluída</option>
-                <option value="Falha">Falha</option>
-            </select>
-
-            <label>Briefing / Objetivo Principal</label>
-            <textarea id="missBriefing" style="height:100px;"></textarea>
-
-            <div style="text-align:right;">
+            <label>Título</label><input type="text" id="missTitle">
+            <label>Status</label><select id="missStatus"><option>Planejamento</option><option>Em Curso</option><option>Concluída</option><option>Falha</option></select>
+            <label>Briefing</label><textarea id="missBriefing" style="height:100px;"></textarea>
+            <div style="text-align:right; margin-top:10px;">
                 <button class="btn btn-outline" onclick="closeModal('modalMission')">Cancelar</button>
                 <button class="btn btn-primary" onclick="saveMission()">Salvar</button>
             </div>
@@ -234,380 +226,383 @@
     </div>
 
     <div id="modalLink" class="modal-overlay">
-        <div class="modal">
-            <h3>Vincular Agentes à Missão</h3>
+        <div class="modal" style="width:700px;">
+            <h3>Vincular Participantes</h3>
             <input type="hidden" id="linkMissionId">
-            <div style="max-height:300px; overflow-y:auto; border:1px solid #333; padding:10px; margin-bottom:15px;" id="linkListContainer">
-                </div>
-            <div style="text-align:right;">
+            <div style="background:#000; padding:10px; margin-bottom:10px; font-size:0.8rem; color:#aaa;">
+                Selecione o papel de cada agente na missão.
+            </div>
+            <div id="linkListContainer" style="max-height:400px; overflow-y:auto; border:1px solid #333; padding:5px;"></div>
+            <div style="text-align:right; margin-top:15px;">
                 <button class="btn btn-outline" onclick="closeModal('modalLink')">Fechar</button>
-                <button class="btn btn-primary" onclick="confirmLinkAgents()">Atualizar Equipe</button>
+                <button class="btn btn-primary" onclick="confirmLinkAgents()">Atualizar Vínculos</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- VARIÁVEIS GLOBAIS ---
         let db = null;
         let SQL = null;
 
-        // --- INICIALIZAÇÃO DO SQL.JS ---
+        // --- INIT ---
         async function initSql() {
-            try {
-                // Carrega o binário do WASM
-                const config = {
-                    locateFile: filename => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${filename}`
-                };
-                SQL = await initSqlJs(config);
-                
-                // Cria DB novo em memória
-                db = new SQL.Database();
-                createTables();
-                refreshAll();
-                document.getElementById('loadingScreen').style.display = 'none';
-            } catch (err) {
-                alert("Erro ao carregar SQLite: " + err);
-            }
+            const config = { locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` };
+            SQL = await initSqlJs(config);
+            db = new SQL.Database();
+            createTables();
+            document.getElementById('loadingScreen').style.display = 'none';
+            refreshAll();
         }
         initSql();
 
-        // --- ESTRUTURA DO BANCO DE DADOS ---
         function createTables() {
-            // Tabela de Grupos (Nodes recursivos)
             db.run(`
-                CREATE TABLE IF NOT EXISTS groups (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    parent_id INTEGER,
-                    name TEXT,
-                    type TEXT,
-                    description TEXT
-                );
+                CREATE TABLE IF NOT EXISTS groups (id INTEGER PRIMARY KEY, parent_id INTEGER, name TEXT, type TEXT, description TEXT);
+                CREATE TABLE IF NOT EXISTS members (id INTEGER PRIMARY KEY, group_id INTEGER, name TEXT, role TEXT, history TEXT, sheet TEXT, image TEXT);
+                CREATE TABLE IF NOT EXISTS missions (id INTEGER PRIMARY KEY, title TEXT, status TEXT, briefing TEXT);
+                CREATE TABLE IF NOT EXISTS scripts (id INTEGER PRIMARY KEY, title TEXT, content TEXT, last_updated TEXT);
+                
+                /* Tabela de Vínculos atualizada com role_type */
+                CREATE TABLE IF NOT EXISTS mission_members (mission_id INTEGER, member_id INTEGER, role_type TEXT, PRIMARY KEY(mission_id, member_id));
             `);
-
-            // Tabela de Membros
-            db.run(`
-                CREATE TABLE IF NOT EXISTS members (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    group_id INTEGER,
-                    name TEXT,
-                    role TEXT,
-                    history TEXT,
-                    sheet TEXT,
-                    FOREIGN KEY(group_id) REFERENCES groups(id)
-                );
-            `);
-
-            // Tabela de Missões
-            db.run(`
-                CREATE TABLE IF NOT EXISTS missions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    title TEXT,
-                    status TEXT,
-                    briefing TEXT
-                );
-            `);
-
-            // Tabela de Junção (Membros <-> Missões)
-            db.run(`
-                CREATE TABLE IF NOT EXISTS mission_members (
-                    mission_id INTEGER,
-                    member_id INTEGER,
-                    PRIMARY KEY (mission_id, member_id)
-                );
-            `);
-        }
-
-        // --- GERENCIAMENTO DE ARQUIVOS (SALVAR/ABRIR) ---
-        function saveDatabaseToFile() {
-            const data = db.export(); // Retorna Uint8Array
-            const blob = new Blob([data], { type: 'application/x-sqlite3' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `campanha_condor_${new Date().toISOString().slice(0,10)}.sqlite`;
-            a.click();
-        }
-
-        function loadDatabaseFromFile(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const r = new FileReader();
-            r.onload = function() {
-                const uints = new Uint8Array(r.result);
-                db = new SQL.Database(uints); // Substitui o DB atual pelo do arquivo
-                refreshAll();
-                alert("Banco de dados carregado com sucesso!");
-            }
-            r.readAsArrayBuffer(file);
+            
+            // Migration simples para garantir colunas em arquivos antigos
+            try { db.run("ALTER TABLE mission_members ADD COLUMN role_type TEXT;"); } catch(e) {}
+            try { db.run("ALTER TABLE members ADD COLUMN image TEXT;"); } catch(e) {}
         }
 
         function refreshAll() {
             renderGroupTree();
             renderMissionList();
-            document.getElementById('mainView').innerHTML = '<div style="text-align:center; margin-top:50px; color:#555;">Banco de dados sincronizado. Selecione um item.</div>';
+            renderScriptList();
         }
 
-        // --- UI: ÁRVORE DE GRUPOS (Recursiva) ---
+        // --- UI RENDERERS ---
+
+        // 1. Grupos (Recursivo)
         function renderGroupTree() {
             const container = document.getElementById('groupsRoot');
-            container.innerHTML = '';
+            const rows = db.exec("SELECT * FROM groups ORDER BY name ASC");
+            if(rows.length === 0) { container.innerHTML = ''; return; }
             
-            // Pega todos os grupos
-            const res = db.exec("SELECT * FROM groups ORDER BY name ASC");
-            if(res.length === 0) return;
+            const all = [];
+            rows[0].values.forEach(r => all.push({ id:r[0], parent:r[1], name:r[2], type:r[3] }));
 
-            const allGroups = [];
-            const rows = res[0].values;
-            rows.forEach(r => {
-                allGroups.push({ id: r[0], parent_id: r[1], name: r[2], type: r[3], desc: r[4] });
-            });
-
-            // Função recursiva para desenhar
-            function buildBranch(parentId) {
-                const children = allGroups.filter(g => g.parent_id === parentId);
-                if (children.length === 0) return '';
-
-                let html = '<div class="tree-branch">';
-                children.forEach(child => {
-                    html += `
-                        <div class="tree-item">
-                            <div class="tree-content" onclick="viewGroupDetails(${child.id})">
-                                <span class="tree-toggle">└</span>
-                                <div>
-                                    <div style="font-weight:600;">${child.name}</div>
-                                    <div style="font-size:0.7rem; color:#666;">${child.type || 'Grupo'}</div>
-                                </div>
-                            </div>
-                            ${buildBranch(child.id)} </div>
-                    `;
+            function buildBranch(pid) {
+                const kids = all.filter(g => g.parent === pid);
+                if(!kids.length) return '';
+                let h = '<div style="margin-left:10px; border-left:1px solid #333;">';
+                kids.forEach(k => {
+                    h += `<div class="tree-content" onclick="viewGroup(${k.id})">
+                            <span style="color:#666; margin-right:5px;">└</span>
+                            <span>${k.name}</span>
+                          </div>
+                          ${buildBranch(k.id)}`;
                 });
-                html += '</div>';
-                return html;
+                h += '</div>';
+                return h;
             }
-
-            // Inicia pelos grupos raiz (parent_id NULL)
             container.innerHTML = buildBranch(null);
         }
 
-        // --- LÓGICA DE GRUPOS (CRUD) ---
-        function viewGroupDetails(id) {
-            const res = db.exec("SELECT * FROM groups WHERE id = " + id);
-            const group = res[0].values[0]; // id, parent, name, type, desc
+        // 2. Missões
+        function renderMissionList() {
+            const container = document.getElementById('missionsRoot');
+            const res = db.exec("SELECT id, title, status FROM missions ORDER BY id DESC");
+            if(!res.length) { container.innerHTML = ''; return; }
+            
+            let h = '';
+            res[0].values.forEach(m => {
+                let color = m[2] === 'Em Curso' ? 'var(--warning)' : (m[2] === 'Concluída' ? 'var(--success)' : '#666');
+                h += `<div class="tree-content" onclick="viewMission(${m[0]})" style="justify-content:space-between;">
+                        <span>${m[1]}</span>
+                        <div style="width:8px; height:8px; border-radius:50%; background:${color};"></div>
+                      </div>`;
+            });
+            container.innerHTML = h;
+        }
 
-            // Buscar membros
-            let membersHtml = '';
-            const memRes = db.exec(`SELECT * FROM members WHERE group_id = ${id}`);
-            if(memRes.length > 0) {
-                memRes[0].values.forEach(m => {
-                    // m: id, group_id, name, role, history, sheet
-                    membersHtml += `
-                        <div class="member-card" onclick="openMemberModal(${m[0]})">
-                            <div class="member-img"></div> 
+        // 3. Roteiros
+        function renderScriptList() {
+            const container = document.getElementById('scriptsRoot');
+            const res = db.exec("SELECT id, title FROM scripts ORDER BY id DESC");
+            if(!res.length) { container.innerHTML = ''; return; }
+            
+            let h = '';
+            res[0].values.forEach(s => {
+                h += `<div class="tree-content" onclick="viewScript(${s[0]})">📄 ${s[1] || 'Sem Título'}</div>`;
+            });
+            container.innerHTML = h;
+        }
+
+        // --- TELAS DE CONTEÚDO (MAIN VIEW) ---
+
+        // A. Visualizar Grupo
+        function viewGroup(id) {
+            const g = db.exec("SELECT * FROM groups WHERE id="+id)[0].values[0];
+            const mems = db.exec("SELECT * FROM members WHERE group_id="+id);
+            
+            let memHtml = '';
+            if(mems.length) {
+                mems[0].values.forEach(m => {
+                    // m: 0:id, 2:name, 3:role, 6:image
+                    let img = m[6] || 'https://via.placeholder.com/50?text=?';
+                    memHtml += `
+                        <div class="member-card" onclick="viewDossier(${m[0]})">
+                            <img src="${img}" class="member-img">
                             <div>
-                                <div style="font-weight:bold; color:${m[3] === 'Lider' ? 'var(--success)' : '#fff'}">${m[2]}</div>
-                                <div style="font-size:0.75rem; color:#888;">${m[3]}</div>
+                                <div style="font-weight:bold;">${m[2]}</div>
+                                <div style="font-size:0.7rem; color:${m[3]=='Lider'?'var(--accent)':'#888'}">${m[3]}</div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
-            } else {
-                membersHtml = '<div style="color:#555; font-style:italic;">Nenhum membro cadastrado.</div>';
-            }
+            } else { memHtml = '<p style="color:#666;">Sem membros.</p>'; }
 
-            const html = `
-                <div class="detail-header">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <div>
-                            <h1 style="color:var(--accent);">${group[2]}</h1>
-                            <span style="background:#222; padding:2px 8px; border-radius:4px; font-size:0.8rem; border:1px solid #444;">${group[3]}</span>
-                        </div>
-                        <div style="display:flex; gap:5px;">
-                            <button class="btn btn-outline" onclick="openNodeModal(${group[0]})">✏️ Editar</button>
-                            <button class="btn btn-outline" onclick="openNodeModal(null, ${group[0]})">↳ Criar Subgrupo</button>
-                        </div>
+            document.getElementById('contentArea').innerHTML = `
+                <div style="margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:15px;">
+                    <div style="float:right;">
+                        <button class="btn btn-outline" onclick="openNodeModal(${g[0]}, ${g[1]})">Editar</button>
+                        <button class="btn btn-outline" onclick="openNodeModal(null, ${g[0]})">+ Subgrupo</button>
                     </div>
-                    <p style="margin-top:15px; color:#ddd; line-height:1.6;">${group[4] || 'Sem descrição.'}</p>
+                    <h1 style="color:var(--accent);">${g[2]}</h1>
+                    <div style="color:#888;">${g[3] || 'Tipo indefinido'}</div>
+                    <p style="margin-top:10px;">${g[4] || ''}</p>
                 </div>
-
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <h3>Membros & Agentes</h3>
-                    <button class="btn btn-primary" onclick="openMemberModal(null, ${group[0]})">+ Adicionar Membro</button>
+                    <h3>Membros</h3>
+                    <button class="btn btn-primary" onclick="openMemberModal(null, ${g[0]})">+ Adicionar</button>
                 </div>
-                <div class="member-list">
-                    ${membersHtml}
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px;">
+                    ${memHtml}
                 </div>
             `;
-            document.getElementById('mainView').innerHTML = html;
         }
 
-        function openNodeModal(id, parentId = null) {
-            document.getElementById('nodeId').value = id || '';
-            document.getElementById('nodeParentId').value = parentId || '';
+        // B. Visualizar Dossiê (Personagem Completo)
+        function viewDossier(id) {
+            const m = db.exec("SELECT * FROM members WHERE id="+id)[0].values[0];
+            const g = db.exec("SELECT name FROM groups WHERE id="+m[1])[0].values[0][0];
             
-            if(id) {
-                // Editando
-                const res = db.exec("SELECT * FROM groups WHERE id=" + id)[0].values[0];
-                document.getElementById('nodeName').value = res[2];
-                document.getElementById('nodeType').value = res[3];
-                document.getElementById('nodeDesc').value = res[4];
-            } else {
-                // Novo
-                document.getElementById('nodeName').value = '';
-                document.getElementById('nodeType').value = '';
-                document.getElementById('nodeDesc').value = '';
+            // Buscar missões
+            const misRes = db.exec(`
+                SELECT m.title, mm.role_type 
+                FROM missions m JOIN mission_members mm ON m.id = mm.mission_id 
+                WHERE mm.member_id = ${id}
+            `);
+            let misHtml = 'Sem histórico de missões.';
+            if(misRes.length) {
+                misHtml = misRes[0].values.map(r => 
+                    `<span style="display:inline-block; background:#222; padding:3px 8px; border-radius:4px; margin-right:5px; font-size:0.8rem; border:1px solid ${r[1]=='Oponente'?'var(--danger)':'var(--success)'}">${r[0]} (${r[1]||'?'})</span>`
+                ).join('');
             }
-            document.getElementById('modalNode').classList.add('open');
+
+            document.getElementById('contentArea').innerHTML = `
+                <button class="btn btn-outline" onclick="viewGroup(${m[1]})" style="margin-bottom:20px;">← Voltar para ${g}</button>
+                
+                <div class="dossier-header">
+                    <img src="${m[6] || 'https://via.placeholder.com/150'}" class="dossier-avatar">
+                    <div class="dossier-info" style="flex:1;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <div class="dossier-role">${m[3]} de ${g}</div>
+                            <button class="btn btn-outline" onclick="openMemberModal(${m[0]})">✏️ Editar Ficha</button>
+                        </div>
+                        <h1>${m[2]}</h1>
+                        <div style="margin-top:10px;">${misHtml}</div>
+                    </div>
+                </div>
+
+                <div class="dossier-grid">
+                    <div>
+                        <h3 style="color:var(--text-muted); margin-bottom:10px;">HISTÓRIA & BIO</h3>
+                        <div style="line-height:1.6;">${m[4] || 'Sem dados biográficos.'}</div>
+                    </div>
+                    <div>
+                        <h3 style="color:var(--text-muted); margin-bottom:10px;">FICHA TÉCNICA</h3>
+                        <div class="sheet-box">${m[5] || 'Sem dados técnicos.'}</div>
+                    </div>
+                </div>
+            `;
         }
 
-        function saveNode() {
-            const id = document.getElementById('nodeId').value;
-            const parent = document.getElementById('nodeParentId').value || 'NULL';
-            const name = document.getElementById('nodeName').value;
-            const type = document.getElementById('nodeType').value;
-            const desc = document.getElementById('nodeDesc').value;
+        // C. Visualizar Missão
+        function viewMission(id) {
+            const m = db.exec("SELECT * FROM missions WHERE id="+id)[0].values[0];
+            
+            // Separar Times
+            const parts = db.exec(`
+                SELECT mem.id, mem.name, mem.image, mm.role_type, g.name
+                FROM members mem
+                JOIN mission_members mm ON mem.id = mm.member_id
+                JOIN groups g ON mem.group_id = g.id
+                WHERE mm.mission_id = ${id}
+            `);
 
-            if(!name) return alert("Nome obrigatório");
-
-            if(id) {
-                db.run(`UPDATE groups SET name=?, type=?, description=? WHERE id=?`, [name, type, desc, id]);
-            } else {
-                db.run(`INSERT INTO groups (parent_id, name, type, description) VALUES (${parent}, ?, ?, ?)`, [name, type, desc]);
+            let allies = '', enemies = '';
+            if(parts.length) {
+                parts[0].values.forEach(p => {
+                    const card = `
+                        <div class="member-card" onclick="viewDossier(${p[0]})" style="margin-bottom:8px;">
+                            <img src="${p[2]||'https://via.placeholder.com/30'}" class="member-img" style="width:30px;height:30px;">
+                            <div>
+                                <div style="font-weight:bold; font-size:0.9rem;">${p[1]}</div>
+                                <div style="font-size:0.7rem; color:#888;">${p[4]}</div>
+                            </div>
+                        </div>`;
+                    
+                    if(p[3] === 'Oponente') enemies += card;
+                    else allies += card;
+                });
             }
-            closeModal('modalNode');
-            renderGroupTree();
-            if(id) viewGroupDetails(id);
+
+            document.getElementById('contentArea').innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px;">
+                    <div>
+                        <h2 style="color:var(--accent); font-size:1.8rem;">${m[1]}</h2>
+                        <span style="color:${m[2]=='Em Curso'?'var(--warning)':(m[2]=='Falha'?'var(--danger)':'var(--success)')}">${m[2]}</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline" onclick="openMissionModal(${m[0]})">Editar Dados</button>
+                        <button class="btn btn-primary" onclick="openLinkModal(${m[0]})">👥 Gerenciar Equipe</button>
+                    </div>
+                </div>
+
+                <div style="background:#111; padding:20px; margin-top:20px; border-radius:6px;">
+                    <h4 style="color:#666; margin-bottom:10px;">BRIEFING</h4>
+                    <div style="line-height:1.6; white-space:pre-wrap;">${m[3]}</div>
+                </div>
+
+                <div class="vs-container">
+                    <div class="vs-col">
+                        <div class="vs-title ally">Aliados & Protagonistas</div>
+                        ${allies || '<p style="text-align:center; color:#555;">Ninguém escalado.</p>'}
+                    </div>
+                    <div class="vs-col">
+                        <div class="vs-title enemy">Oponentes & Ameaças</div>
+                        ${enemies || '<p style="text-align:center; color:#555;">Nenhuma ameaça identificada.</p>'}
+                    </div>
+                </div>
+            `;
         }
 
-        // --- LÓGICA DE MEMBROS ---
-        function openMemberModal(id, groupId = null) {
+        // D. Roteiros (Editor e Leitor)
+        function createNewScript() {
+            db.run("INSERT INTO scripts (title, content) VALUES ('Novo Roteiro', '')");
+            renderScriptList();
+            const id = db.exec("SELECT last_insert_rowid()")[0].values[0][0];
+            viewScript(id);
+        }
+
+        function viewScript(id) {
+            const s = db.exec("SELECT * FROM scripts WHERE id="+id)[0].values[0];
+            renderScriptEditor(id, s[1], s[2]);
+        }
+
+        function renderScriptEditor(id, title, content) {
+            document.getElementById('contentArea').innerHTML = `
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <input type="text" id="scriptTitle" value="${title}" style="width:50%; font-size:1.2rem; font-weight:bold;" onchange="autoSaveScript(${id})">
+                    <div>
+                        <button class="btn btn-primary" onclick="toggleReaderMode()">👁️ Modo Leitura</button>
+                        <button class="btn btn-danger" onclick="deleteScript(${id})">🗑️</button>
+                    </div>
+                </div>
+                <div id="editorContainer">
+                    <textarea id="scriptBody" class="script-editor" placeholder="Escreva seu roteiro aqui..." oninput="autoSaveScript(${id})">${content}</textarea>
+                </div>
+                <div id="readerContainer" style="display:none; background:#ccc; padding:20px; overflow-y:auto; height:calc(100vh - 150px);">
+                    <div class="script-reader">
+                        <h1 id="readTitle">${title}</h1>
+                        <div id="readBody">${formatScript(content)}</div>
+                    </div>
+                    <button class="btn btn-outline" style="position:fixed; bottom:20px; right:40px; background:#000; color:#fff;" onclick="toggleReaderMode()">✏️ Voltar a Editar</button>
+                </div>
+            `;
+        }
+
+        function toggleReaderMode() {
+            const edit = document.getElementById('editorContainer');
+            const read = document.getElementById('readerContainer');
+            const body = document.getElementById('scriptBody').value;
+            
+            if(edit.style.display === 'none') {
+                edit.style.display = 'block';
+                read.style.display = 'none';
+            } else {
+                document.getElementById('readTitle').innerText = document.getElementById('scriptTitle').value;
+                document.getElementById('readBody').innerHTML = formatScript(body);
+                edit.style.display = 'none';
+                read.style.display = 'block';
+            }
+        }
+
+        function formatScript(txt) {
+            // Conversor simples de quebra de linha para HTML
+            return txt.split('\n').map(line => `<p>${line}</p>`).join('');
+        }
+
+        function autoSaveScript(id) {
+            const t = document.getElementById('scriptTitle').value;
+            const c = document.getElementById('scriptBody').value;
+            db.run("UPDATE scripts SET title=?, content=? WHERE id=?", [t, c, id]);
+            // Atualiza nome na lista lateral se mudou
+            renderScriptList(); 
+        }
+
+        function deleteScript(id) {
+            if(confirm("Apagar roteiro?")) {
+                db.run("DELETE FROM scripts WHERE id="+id);
+                renderScriptList();
+                document.getElementById('contentArea').innerHTML = '';
+            }
+        }
+
+        // --- LÓGICA DE MODAIS E CRUD ---
+        
+        // Membro
+        function openMemberModal(id, gid) {
             document.getElementById('memId').value = id || '';
-            document.getElementById('memNodeId').value = groupId || '';
-
+            document.getElementById('memGroupId').value = gid || '';
             if(id) {
-                const res = db.exec("SELECT * FROM members WHERE id=" + id)[0].values[0];
-                document.getElementById('memName').value = res[2];
-                document.getElementById('memRole').value = res[3];
-                document.getElementById('memHistory').value = res[4];
-                document.getElementById('memSheet').value = res[5];
-                // Caso queira editar o grupo do membro, precisaria de logica extra, simplifiquei aqui
-                document.getElementById('memNodeId').value = res[1];
+                const m = db.exec("SELECT * FROM members WHERE id="+id)[0].values[0];
+                document.getElementById('memName').value = m[2];
+                document.getElementById('memRole').value = m[3];
+                document.getElementById('memHistory').value = m[4];
+                document.getElementById('memSheet').value = m[5];
+                document.getElementById('memImg').value = m[6] || '';
             } else {
                 document.getElementById('memName').value = '';
                 document.getElementById('memRole').value = 'Membro';
                 document.getElementById('memHistory').value = '';
                 document.getElementById('memSheet').value = '';
+                document.getElementById('memImg').value = '';
             }
             document.getElementById('modalMember').classList.add('open');
         }
 
         function saveMember() {
             const id = document.getElementById('memId').value;
-            const gid = document.getElementById('memNodeId').value;
+            const gid = document.getElementById('memGroupId').value;
             const name = document.getElementById('memName').value;
             const role = document.getElementById('memRole').value;
             const hist = document.getElementById('memHistory').value;
             const sheet = document.getElementById('memSheet').value;
+            const img = document.getElementById('memImg').value;
 
-            if(!name) return alert("Nome obrigatório");
-
-            if(id) {
-                db.run("UPDATE members SET name=?, role=?, history=?, sheet=? WHERE id=?", [name, role, hist, sheet, id]);
-            } else {
-                db.run("INSERT INTO members (group_id, name, role, history, sheet) VALUES (?, ?, ?, ?, ?)", [gid, name, role, hist, sheet]);
-            }
+            if(id) db.run("UPDATE members SET name=?, role=?, history=?, sheet=?, image=? WHERE id=?", [name, role, hist, sheet, img, id]);
+            else db.run("INSERT INTO members (group_id, name, role, history, sheet, image) VALUES (?,?,?,?,?,?)", [gid, name, role, hist, sheet, img]);
+            
             closeModal('modalMember');
-            viewGroupDetails(gid);
+            viewGroup(gid);
         }
 
-        // --- LÓGICA DE MISSÕES ---
-        function renderMissionList() {
-            const container = document.getElementById('missionsRoot');
-            container.innerHTML = '';
-            const res = db.exec("SELECT * FROM missions ORDER BY id DESC");
-            
-            if(res.length > 0) {
-                res[0].values.forEach(m => {
-                    container.innerHTML += `
-                        <div class="tree-content" onclick="viewMissionDetails(${m[0]})" style="padding:10px; border-bottom:1px solid #333;">
-                            <div>
-                                <div style="font-weight:bold;">${m[1]}</div>
-                                <div style="font-size:0.7rem; color:${getStatusColor(m[2])};">● ${m[2]}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                container.innerHTML = '<div style="padding:10px; color:#666;">Nenhuma missão.</div>';
-            }
-        }
-
-        function getStatusColor(status) {
-            if(status === 'Em Curso') return '#ffff00';
-            if(status === 'Concluída') return '#00ff00';
-            if(status === 'Falha') return '#ff0000';
-            return '#aaa';
-        }
-
-        function viewMissionDetails(id) {
-            const res = db.exec("SELECT * FROM missions WHERE id=" + id)[0].values[0];
-            
-            // Buscar Agentes Vinculados
-            // JOIN query
-            const agentsRes = db.exec(`
-                SELECT m.id, m.name, m.role, g.name 
-                FROM members m 
-                JOIN mission_members mm ON m.id = mm.member_id 
-                JOIN groups g ON m.group_id = g.id
-                WHERE mm.mission_id = ${id}
-            `);
-
-            let agentsHtml = '';
-            if(agentsRes.length > 0) {
-                agentsRes[0].values.forEach(a => {
-                    agentsHtml += `
-                        <div class="member-card">
-                            <div class="member-img"></div>
-                            <div>
-                                <div style="font-weight:bold;">${a[1]}</div>
-                                <div style="font-size:0.7rem; color:#888;">${a[2]} | ${a[3]}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                agentsHtml = '<p style="color:#666;">Nenhum agente designado.</p>';
-            }
-
-            const html = `
-                <div class="detail-header">
-                    <div style="display:flex; justify-content:space-between;">
-                        <h1 style="color:var(--accent);">MISSÃO: ${res[1]}</h1>
-                        <button class="btn btn-outline" onclick="openMissionModal(${res[0]})">✏️ Editar</button>
-                    </div>
-                    <div style="margin-top:10px; font-weight:bold; color:${getStatusColor(res[2])}">STATUS: ${res[2]}</div>
-                    <div style="background:#111; padding:15px; margin-top:15px; border-radius:6px; border-left:3px solid var(--accent);">
-                        <h4 style="color:#666; margin-bottom:5px;">BRIEFING</h4>
-                        ${res[3] || '...'}
-                    </div>
-                </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <h3>Força Tarefa (Agentes Vinculados)</h3>
-                    <button class="btn btn-primary" onclick="openLinkAgentModal(${res[0]})">⚙️ Gerenciar Equipe</button>
-                </div>
-                <div class="member-list">
-                    ${agentsHtml}
-                </div>
-            `;
-            document.getElementById('mainView').innerHTML = html;
-        }
-
+        // Missão
         function openMissionModal(id) {
             document.getElementById('missId').value = id || '';
             if(id) {
-                const res = db.exec("SELECT * FROM missions WHERE id=" + id)[0].values[0];
-                document.getElementById('missTitle').value = res[1];
-                document.getElementById('missStatus').value = res[2];
-                document.getElementById('missBriefing').value = res[3];
+                const m = db.exec("SELECT * FROM missions WHERE id="+id)[0].values[0];
+                document.getElementById('missTitle').value = m[1];
+                document.getElementById('missStatus').value = m[2];
+                document.getElementById('missBriefing').value = m[3];
             } else {
                 document.getElementById('missTitle').value = '';
                 document.getElementById('missStatus').value = 'Planejamento';
@@ -618,88 +613,113 @@
 
         function saveMission() {
             const id = document.getElementById('missId').value;
-            const title = document.getElementById('missTitle').value;
-            const status = document.getElementById('missStatus').value;
-            const brief = document.getElementById('missBriefing').value;
-
-            if(!title) return alert("Título obrigatório");
-
-            if(id) {
-                db.run("UPDATE missions SET title=?, status=?, briefing=? WHERE id=?", [title, status, brief, id]);
-                viewMissionDetails(id);
-            } else {
-                db.run("INSERT INTO missions (title, status, briefing) VALUES (?, ?, ?)", [title, status, brief]);
-            }
+            const t = document.getElementById('missTitle').value;
+            const s = document.getElementById('missStatus').value;
+            const b = document.getElementById('missBriefing').value;
+            
+            if(id) { db.run("UPDATE missions SET title=?, status=?, briefing=? WHERE id=?", [t,s,b,id]); viewMission(id); }
+            else { db.run("INSERT INTO missions (title, status, briefing) VALUES (?,?,?)", [t,s,b]); }
+            
             closeModal('modalMission');
             renderMissionList();
         }
 
-        // --- VINCULAR AGENTES (MANY-TO-MANY) ---
-        function openLinkAgentModal(missionId) {
-            document.getElementById('linkMissionId').value = missionId;
-            const container = document.getElementById('linkListContainer');
-            container.innerHTML = 'Carregando...';
-
-            // Pega todos os membros de todos os grupos
-            const allMem = db.exec("SELECT m.id, m.name, g.name FROM members m JOIN groups g ON m.group_id = g.id ORDER BY g.name, m.name");
+        // Vínculos (Link Agents)
+        function openLinkModal(mid) {
+            document.getElementById('linkMissionId').value = mid;
+            const list = document.getElementById('linkListContainer');
             
-            // Pega os que já estão vinculados
-            const linkedRes = db.exec(`SELECT member_id FROM mission_members WHERE mission_id = ${missionId}`);
-            const linkedIds = linkedRes.length > 0 ? linkedRes[0].values.map(r => r[0]) : [];
+            // Todos os membros
+            const all = db.exec("SELECT m.id, m.name, g.name FROM members m JOIN groups g ON m.group_id = g.id ORDER BY g.name");
+            // Vinculados
+            const linked = db.exec("SELECT member_id, role_type FROM mission_members WHERE mission_id="+mid);
+            const linkMap = {};
+            if(linked.length) linked[0].values.forEach(l => linkMap[l[0]] = l[1]);
 
-            if(allMem.length === 0) {
-                container.innerHTML = "Não há membros cadastrados no sistema.";
-                document.getElementById('modalLink').classList.add('open');
-                return;
+            let h = '<table style="width:100%; border-collapse:collapse;">';
+            if(all.length) {
+                all[0].values.forEach(m => {
+                    const myRole = linkMap[m[0]]; // undefined, 'Aliado', 'Oponente'
+                    h += `
+                        <tr style="border-bottom:1px solid #222;">
+                            <td style="padding:5px;">${m[1]} <span style="color:#666; font-size:0.8em;">(${m[2]})</span></td>
+                            <td style="text-align:right;">
+                                <select class="link-select" data-mid="${m[0]}" style="width:120px; margin:0; padding:2px; height:auto; background:#111;">
+                                    <option value="" ${!myRole?'selected':''}>--</option>
+                                    <option value="Aliado" ${myRole=='Aliado'?'selected':''}>Aliado</option>
+                                    <option value="Oponente" ${myRole=='Oponente'?'selected':''}>Oponente</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
             }
-
-            let html = '';
-            allMem[0].values.forEach(m => {
-                const isChecked = linkedIds.includes(m[0]) ? 'checked' : '';
-                html += `
-                    <div style="padding:5px; border-bottom:1px solid #222; display:flex; gap:10px;">
-                        <input type="checkbox" class="agent-checkbox" value="${m[0]}" ${isChecked}>
-                        <div>
-                            <span style="font-weight:bold; color:#ddd;">${m[1]}</span>
-                            <span style="font-size:0.7rem; color:#666; margin-left:5px;">(${m[2]})</span>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
+            h += '</table>';
+            list.innerHTML = h;
             document.getElementById('modalLink').classList.add('open');
         }
 
         function confirmLinkAgents() {
-            const mId = document.getElementById('linkMissionId').value;
-            const checkboxes = document.querySelectorAll('.agent-checkbox');
+            const mid = document.getElementById('linkMissionId').value;
+            const selects = document.querySelectorAll('.link-select');
             
-            // Remove todos os vínculos atuais dessa missão
-            db.run(`DELETE FROM mission_members WHERE mission_id = ${mId}`);
-
-            // Adiciona os selecionados
-            const stmt = db.prepare("INSERT INTO mission_members (mission_id, member_id) VALUES (?, ?)");
-            checkboxes.forEach(cb => {
-                if(cb.checked) {
-                    stmt.run([mId, cb.value]);
+            db.run("DELETE FROM mission_members WHERE mission_id="+mid);
+            
+            const stmt = db.prepare("INSERT INTO mission_members (mission_id, member_id, role_type) VALUES (?,?,?)");
+            selects.forEach(s => {
+                if(s.value) {
+                    stmt.run([mid, s.dataset.mid, s.value]);
                 }
             });
             stmt.free();
-
             closeModal('modalLink');
-            viewMissionDetails(mId);
+            viewMission(mid);
+        }
+        
+        // Node (Group) Save/Edit logic omitted for brevity (same as prev version, attached to saveNode)
+        function openNodeModal(id, pid) {
+            document.getElementById('nodeId').value = id||''; document.getElementById('nodeParentId').value = pid||'';
+            if(id) {
+                 const r = db.exec("SELECT * FROM groups WHERE id="+id)[0].values[0];
+                 document.getElementById('nodeName').value=r[2]; document.getElementById('nodeType').value=r[3]; document.getElementById('nodeDesc').value=r[4];
+            } else {
+                document.getElementById('nodeName').value=''; document.getElementById('nodeType').value=''; document.getElementById('nodeDesc').value='';
+            }
+            document.getElementById('modalNode').classList.add('open');
         }
 
-        // --- UTILITÁRIOS ---
-        function switchTab(tab) {
-            document.getElementById('treeGroups').style.display = tab === 'groups' ? 'block' : 'none';
-            document.getElementById('listMissions').style.display = tab === 'missions' ? 'block' : 'none';
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        function saveNode() {
+            const id = document.getElementById('nodeId').value;
+            const pid = document.getElementById('nodeParentId').value;
+            const n = document.getElementById('nodeName').value;
+            const t = document.getElementById('nodeType').value;
+            const d = document.getElementById('nodeDesc').value;
+            if(id) db.run("UPDATE groups SET name=?, type=?, description=? WHERE id=?", [n,t,d,id]);
+            else db.run("INSERT INTO groups (parent_id, name, type, description) VALUES (?,?,?,?)", [pid||null, n,t,d]);
+            closeModal('modalNode');
+            renderGroupTree();
+            if(id) viewGroup(id);
+        }
+
+        // --- CORE UTILS ---
+        function switchTab(t) {
+            document.querySelectorAll('.tree-container').forEach(e=>e.style.display='none');
+            document.getElementById(t==='groups'?'tabGroups':(t==='missions'?'tabMissions':'tabScripts')).style.display='block';
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
             event.target.classList.add('active');
         }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('open');
+        function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+        
+        function saveDatabaseToFile() {
+            const blob = new Blob([db.export()], {type:'application/x-sqlite3'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+            a.download = `sombra_condor_${new Date().toISOString().slice(0,10)}.sqlite`; a.click();
+        }
+        function loadDatabaseFromFile(i) {
+            const f = i.files[0]; if(!f) return;
+            const r = new FileReader();
+            r.onload = function() { db = new SQL.Database(new Uint8Array(r.result)); refreshAll(); }
+            r.readAsArrayBuffer(f);
         }
     </script>
 </body>
