@@ -432,14 +432,28 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            span a{
+                color: var(--accent);        
+            }
+            nav{
+                width: 100%;
+                display: inline;
+                text-decoration: none;
+                list-style: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="title">⚔️ Sombra do Condor ⚔️</div>
-
         <div class="panel">
+            <nav class="container">
+                <ul class="stat-block">
+                    <span class="stat-label"><a href="/battle_manager.html">Battle manager</a></span>
+                    <span ><a class="stat-label" href="/rpg_manager.html">Rpg Manager</a></span>
+                </ul>
+            </nav>
             <h2>Perícias <span id="skillTracker" class="badge">Slots: 0/2</span></h2>
             <p class="info">📊 Base: 2 | +2× por INT | +1 a cada 5 Exp<br>🎯 Máx Nível: +10 (&lt;30 Exp) ou +20 (30+ Exp)</p>
             <div id="skillsContainer" class="scroll-container"></div>
@@ -476,6 +490,7 @@
                     <div class="stat-box"><div class="stat-value" id="pe">0</div><div class="stat-name">P. Esforço</div></div>
                     <div class="stat-box"><div class="stat-value" id="carga">0</div><div class="stat-name">Carga Máx</div></div>
                     <div class="stat-box"><div class="stat-value" id="desloc">0</div><div class="stat-name">Deslocamento</div></div>
+                    <div class="stat-box"><div class="stat-value" id="prd">0</div><div class="stat-name">Penetração RD</div></div>
                 </div>
             </div>
 
@@ -610,10 +625,12 @@
             const fortitude = val('skill_Fortitude');
             const atletismo = val('skill_Atletismo');
             const religiao = val('skill_Religião');
+            const crime = val("skill_Crime");
 
             const bonusPerc = Math.floor(percepcao / 5) * 2;
             const bonusReligiao = Math.floor(religiao / 5) * 2;
             const bonusVont = Math.floor(vontade / 5) * 2;
+            const bonusCrime = Math.floor(crime / 5) * 2;
 
             // Calcular carga ANTES de atualizar o DOM
             const maxCarga = 5 + for_ * 2 + Math.floor(atletismo / 5) * 2;
@@ -623,6 +640,7 @@
             get('pe').textContent = (for_ + pre + vig) * 2 + Math.floor(expEf / 3) + bonusVont+bonusReligiao;
             get('carga').textContent = maxCarga;
             get('desloc').textContent = agi === 0 ? 1 : agi * 3;
+            get('prd').textContent = bonusCrime;
 
             const maxAttr = 9 + Math.floor(expEf / 10);
             const usedAttr = attrs.reduce((a, b) => a + b, 0);
