@@ -1,0 +1,120 @@
+ :root {
+            --bg-dark: #0a0a0f;
+            --bg-panel: #16161c;
+            --bg-sidebar: #111116;
+            --accent: #8257e6;
+            --accent-hover: #9d7bef;
+            --text: #e1e1e6;
+            --text-muted: #a8a8b3;
+            --border: #2d2d3a;
+            --success: #04d361;
+            --danger: #e83f5b;
+            --warning: #ffbf00;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* UTILS */
+        .btn { padding: 8px 16px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; font-size: 0.8rem; display:inline-flex; align-items:center; gap:5px; transition:0.2s;}
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-danger { background: rgba(232, 63, 91, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--text); color: var(--text); background: var(--border); }
+        
+        input, textarea, select {
+            background: #0f0f14; border: 1px solid var(--border); color: var(--text);
+            padding: 10px; border-radius: 4px; width: 100%; margin-bottom: 10px; font-family: 'Inter', sans-serif;
+        }
+
+        /* LAYOUT */
+        .top-bar {
+            height: 50px; background: var(--bg-panel); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+        }
+        .workspace { display: flex; flex: 1; overflow: hidden; }
+        
+        .sidebar {
+            width: 280px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+        }
+        .sidebar-tabs { display: flex; border-bottom: 1px solid var(--border); }
+        .tab-btn {
+            flex: 1; background: transparent; border: none; color: var(--text-muted);
+            padding: 12px; cursor: pointer; font-weight: bold; border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(130,87,230,0.05); }
+
+        .tree-container { flex: 1; overflow-y: auto; padding: 10px; }
+        
+        .main-view { flex: 1; padding: 0; overflow-y: hidden; position: relative; background: radial-gradient(circle at top right, #1a1a24 0%, var(--bg-dark) 40%); }
+        .scrollable-content { height: 100%; overflow-y: auto; padding: 30px; }
+
+        /* TREE VIEW */
+        .tree-item { margin-left: 12px; border-left: 1px solid #333; }
+        .tree-content {
+            padding: 6px 10px; display: flex; align-items: center; cursor: pointer; border-radius: 4px; margin-bottom: 2px;
+        }
+        .tree-content:hover { background: #222; }
+        .tree-content.active { background: var(--accent); color: white; }
+
+        /* CARDS & LISTS */
+        .member-card {
+            background: var(--bg-panel); padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+            display: flex; gap: 10px; align-items: center; cursor: pointer; transition: 0.2s;
+        }
+        .member-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .member-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #000; border:1px solid #444; }
+
+        /* DOSSIER (Tela de Personagem) */
+        .dossier-header { display: flex; gap: 20px; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .dossier-avatar { width: 120px; height: 120px; border-radius: 8px; background: #222; object-fit: cover; border: 2px solid var(--accent); }
+        .dossier-info h1 { font-size: 2rem; color: #fff; }
+        .dossier-role { color: var(--accent); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .dossier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .sheet-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid var(--border); font-family: monospace; white-space: pre-wrap; color: #a8a8b3; }
+
+        /* SCRIPT MODE */
+        .script-editor { width: 100%; height: calc(100vh - 150px); background: #111; color: #ddd; font-family: 'Merriweather', serif; font-size: 1.1rem; line-height: 1.6; padding: 20px; border: none; resize: none; outline: none; }
+        .script-reader { 
+            max-width: 800px; margin: 0 auto; background: #e1e1e6; color: #222; 
+            padding: 40px; min-height: 100%; font-family: 'Merriweather', serif; font-size: 1.1rem; line-height: 1.8;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+        }
+        .script-reader h1 { color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .script-reader p { margin-bottom: 15px; }
+
+        /* MISSION VERSUS */
+        .vs-container { display: flex; gap: 20px; margin-top: 20px; }
+        .vs-col { flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+        .vs-title { font-weight: 900; text-transform: uppercase; margin-bottom: 10px; text-align: center; padding-bottom:5px; border-bottom:1px solid #333; }
+        .vs-title.ally { color: var(--success); }
+        .vs-title.enemy { color: var(--danger); }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--bg-panel); width: 600px; max-width: 95%; max-height: 90vh;
+            border-radius: 12px; border: 1px solid var(--border); padding: 25px;
+            overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        #loadingScreen {
+            position: fixed; top:0; left:0; width:100%; height:100%; background:#0a0a0f; 
+            z-index: 999; display: flex; flex-direction:column; justify-content:center; align-items:center;
+        }
