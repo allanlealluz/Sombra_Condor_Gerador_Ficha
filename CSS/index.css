@@ -513,3 +513,7 @@
             gap: 8px;
         }
     }
+    li a{
+        text-decoration:none;
+        color:white;
+    }
