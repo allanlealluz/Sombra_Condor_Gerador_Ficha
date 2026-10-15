@@ -179,63 +179,56 @@
             get('habName').closest('.panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        function calcular() {
-            const exp = val('exp');
-            const expEf = Math.max(0, exp - 5);
-            const attrs = ['Forca', 'Agilidade', 'Vigor', 'Presenca', 'Intelecto'].map(a => val('attr' + a));
-            const [for_, agi, vig, pre, int] = attrs;
+       function calcular() {
+    const exp = val('exp');
+    const expEf = Math.max(0, exp - 5);
+    const attrs = ['Forca', 'Agilidade', 'Vigor', 'Presenca', 'Intelecto'].map(a => val('attr' + a));
+    const [for_, agi, vig, pre, int] = attrs;
 
-            const percepcao = val('skill_Percepção');
-            const vontade = val('skill_Vontade');
-            const fortitude = val('skill_Fortitude');
-            const atletismo = val('skill_Atletismo');
-            const religiao = val('skill_Religião');
-            const crime = val("skill_Crime");
-            const intuicao = val("skill_Intuicao")
-            const acrobacias = val("skill_Acrobacias")
+    // cada 5 pontos na perícia = +2 de bônus
+    const bonus = nome => Math.floor(val('skill_' + nome) / 5) * 2;
 
-            const bonusPerc = Math.floor(percepcao / 5) * 2;
-            const bonusReligiao = Math.floor(religiao / 5) * 2;
-            const bonusVont = Math.floor(vontade / 5) * 2;
-            const bonusCrime = Math.floor(crime / 5) * 2;
-            const bonusIntuicao = Math.floor(intuicao / 5) * 2;
-            const bonusAcrobacia = Math.floor(acrobacias/5) * 2;
-            
+    const bonusPerc      = bonus('Percepção');
+    const bonusReligiao  = bonus('Religião');
+    const bonusVont      = bonus('Vontade');
+    const bonusCrime     = bonus('Crime');
+    const bonusIntuicao  = bonus('Intuição');
+    const bonusAcrobacia = bonus('Acrobacia');
+    const fortitude      = val('skill_Fortitude'); // entra direto no PV
 
-            const maxCarga = 5 + for_ * 2 + Math.floor(atletismo / 5) * 2;
-            
-            get('def').textContent = 10 + agi + bonusPerc+ bonusIntuicao;
-            get('pv').textContent = 10 + vig * 5 + expEf + Math.floor(expEf / 5) + fortitude;
-            get('pe').textContent = (for_ + pre + vig) * 2 + Math.floor(expEf / 3) + bonusVont+bonusReligiao;
-            get('carga').textContent = maxCarga;
-            get('desloc').textContent = agi === 0 ? 1 : agi * 3 + bonusAcrobacia;
-            get('prd').textContent = bonusCrime;
+    const maxCarga = 5 + for_ * 2 + bonus('Atletismo');
 
-            const maxAttr = 9 + Math.floor(expEf / 10);
-            const usedAttr = attrs.reduce((a, b) => a + b, 0);
-            updateBadge('attrTracker', usedAttr, maxAttr, 'Pontos');
+    get('def').textContent    = 10 + agi + bonusPerc + bonusIntuicao;
+    get('pv').textContent     = 10 + vig * 5 + expEf + Math.floor(expEf / 5) + fortitude;
+    get('pe').textContent     = (for_ + pre + vig) * 2 + Math.floor(expEf / 3) + bonusVont + bonusReligiao;
+    get('carga').textContent  = maxCarga;
+    get('desloc').textContent = agi === 0 ? 1 : agi * 3 + bonusAcrobacia;
+    get('prd').textContent    = bonusCrime;
 
-            const maxSkill = exp >= 30 ? 20 : 10;
-            const maxSlots = 2 + int * 2 + Math.floor(expEf / 5);
-            let usedSlots = 0;
+    const maxAttr = 9 + Math.floor(expEf / 10);
+    const usedAttr = attrs.reduce((a, b) => a + b, 0);
+    updateBadge('attrTracker', usedAttr, maxAttr, 'Pontos');
 
-            document.querySelectorAll('.skill-input').forEach(inp => {
-                const v = val(inp.id);
-                inp.style.borderColor = v > maxSkill ? 'var(--danger)' : 'var(--border)';
-                inp.style.color = v > maxSkill ? 'var(--danger)' : 'white';
-                usedSlots += Math.floor(v / 5);
-            });
-            updateBadge('skillTracker', usedSlots, maxSlots, 'Slots');
+    const maxSkill = exp >= 30 ? 20 : 10;
+    const maxSlots = 2 + int * 2 + Math.floor(expEf / 5);
+    let usedSlots = 0;
 
-            const maxHabs = 2 + int + Math.floor(expEf / 5);
-            updateBadge('habTracker', habs.length, maxHabs, 'Habs');
+    document.querySelectorAll('.skill-input').forEach(inp => {
+        const v = val(inp.id);
+        inp.style.borderColor = v > maxSkill ? 'var(--danger)' : 'var(--border)';
+        inp.style.color = v > maxSkill ? 'var(--danger)' : 'white';
+        usedSlots += Math.floor(v / 5);
+    });
+    updateBadge('skillTracker', usedSlots, maxSlots, 'Slots');
 
-            const pesoTotal = inv.reduce((sum, item) => sum + item.peso, 0);
-            const tracker = get('loadTracker');
-            tracker.textContent = `Peso: ${pesoTotal}/${maxCarga}`;
-            tracker.className = pesoTotal > maxCarga ? 'badge error' : 'badge ok';
-        }
+    const maxHabs = 2 + int + Math.floor(expEf / 5);
+    updateBadge('habTracker', habs.length, maxHabs, 'Habs');
 
+    const pesoTotal = inv.reduce((sum, item) => sum + item.peso, 0);
+    const tracker = get('loadTracker');
+    tracker.textContent = `Peso: ${pesoTotal}/${maxCarga}`;
+    tracker.className = pesoTotal > maxCarga ? 'badge error' : 'badge ok';
+}
         function updateBadge(id, atual, max, label) {
             const el = get(id);
             el.textContent = `${label}: ${atual}/${max}`;
