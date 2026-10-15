@@ -191,19 +191,24 @@
             const atletismo = val('skill_Atletismo');
             const religiao = val('skill_Religião');
             const crime = val("skill_Crime");
+            const intuicao = val("skill_Intuicao")
+            const acrobacias = val("skill_Acrobacias")
 
             const bonusPerc = Math.floor(percepcao / 5) * 2;
             const bonusReligiao = Math.floor(religiao / 5) * 2;
             const bonusVont = Math.floor(vontade / 5) * 2;
             const bonusCrime = Math.floor(crime / 5) * 2;
+            const bonusIntuicao = Math.floor(intuicao / 5) * 2;
+            const bonusAcrobacia = Math.floor(acrobacias/5) * 2;
+            
 
             const maxCarga = 5 + for_ * 2 + Math.floor(atletismo / 5) * 2;
             
-            get('def').textContent = 10 + agi + bonusPerc;
+            get('def').textContent = 10 + agi + bonusPerc+ bonusIntuicao;
             get('pv').textContent = 10 + vig * 5 + expEf + Math.floor(expEf / 5) + fortitude;
             get('pe').textContent = (for_ + pre + vig) * 2 + Math.floor(expEf / 3) + bonusVont+bonusReligiao;
             get('carga').textContent = maxCarga;
-            get('desloc').textContent = agi === 0 ? 1 : agi * 3;
+            get('desloc').textContent = agi === 0 ? 1 : agi * 3 + bonusAcrobacia;
             get('prd').textContent = bonusCrime;
 
             const maxAttr = 9 + Math.floor(expEf / 10);
