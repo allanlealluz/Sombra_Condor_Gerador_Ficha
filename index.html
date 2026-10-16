@@ -132,7 +132,22 @@
             { nome: "Assasinato", gasto: "2PE", efeito: "Aumenta a margem de critico em 5 e causa 1d6 a mais de dano caso esteja furtivo" },
             { nome: "Tiro sequencial", gasto: "1PE", efeito: "Ataca novamente com uma arma leve (max:1x rodada)" },
             { nome: "Tiro brutal", gasto: "3PE", efeito: "Em um disparo, aumenta a margem de critico em 5 e causa +2d6 de dano" },
-            { nome: "Brigão", gasto: "2PE", efeito: "Ataca novamente com um soco. (Max:2x rodada)" }
+            { nome: "Brigão", gasto: "2PE", efeito: "Ataca novamente com um soco. (Max:2x rodada)" },
+            // Médico
+            { nome: "Primeiros Socorros", gasto: "2PE e ação padrão", efeito: "Toca em um aliado e cura 2d6 + metade do valor da sua perícia Medicina em PV (max: 1x por alvo por cena)" },
+            { nome: "Estabilizar", gasto: "1PE e ação de movimento", efeito: "Teste de Medicina DT 15 para estabilizar um aliado morrendo. Ele acorda com 1d6 de PV" },
+
+            // Tank
+            { nome: "Segundo Fôlego", gasto: "2PE e ação de movimento", efeito: "Recupera 1d8 + vigor em PV (max: 1x por cena)" },
+            { nome: "Provocar", gasto: "1PE e ação de movimento", efeito: "Inimigos a até 3 blocos fazem teste de vontade contra DT 10 + presença + intimidação. Quem falhar tem -5 no acerto contra qualquer alvo que não seja você até o seu próximo turno" },
+            { nome: "Postura Defensiva", gasto: "2PE e ação de movimento", efeito: "Ganha +5 de defesa e +2 de RD até o início do seu próximo turno" },
+
+            // Evasiva
+            { nome: "Passo Fluido", gasto: "1PE e reação", efeito: "Ao esquivar com sucesso, se move metade do seu deslocamento sem gastar ação" },
+            { nome: "Instinto", gasto: "Nenhum", efeito: "Soma metade do valor da sua perícia Intuição nos testes de esquiva (requer Intuição treinada)" },
+
+            // Suporte
+            { nome: "Plano Tático", gasto: "2PE e ação padrão", efeito: "Um aliado que te ouça ganha +5 no próximo teste ou ataque dele até o fim da próxima rodada. Com Tática 10 ou mais, o bônus vira +8" }
         ];
 
         let inv = [];

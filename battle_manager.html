@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sombra do Condor - VTT 2.2 (Itens Update)</title>
+    <title>Sombra do Condor - VTT 2.3 (Parser Refinado)</title>
     <link rel="shortcut icon" href="sombra do condor.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -12,16 +12,14 @@
 <body>
 
     <div class="container">
-        
         <div class="header-area">
             <div class="top-row">
-                <div class="title">VTT Tático 2.2</div>
+                <div class="title">VTT Tático 2.3</div>
                 <div class="turn-display">
                     <div class="turn-label">RODADA</div>
                     <div class="turn-number" id="roundDisplay">1</div>
                 </div>
             </div>
-
             <div class="combat-controls">
                 <button class="btn-control btn-sort" onclick="sortInitiative()">⚡ Ordenar</button>
                 <button class="btn-control btn-start" onclick="startCombat()">▶ Iniciar</button>
@@ -44,13 +42,10 @@
     <div class="dice-overlay" id="diceModal" onclick="closeDice(event)">
         <div class="dice-modal">
             <div style="font-weight:bold; color:var(--accent); text-transform:uppercase; letter-spacing:1px;" id="diceTitle">TESTE</div>
-            
             <div class="dice-formula" id="diceFormula">3d20 + 5</div>
             <div class="dice-val-big" id="diceFinal">20</div>
-            
             <div class="rolls-display" id="diceRolls">Rolagem: [5, 12, 20]</div>
             <div class="dice-detail" id="diceCalc">20 (Dado) + 5 (Bônus)</div>
-            
             <button class="close-modal" onclick="document.getElementById('diceModal').classList.remove('show')">FECHAR</button>
         </div>
     </div>
@@ -79,11 +74,16 @@
         let characters = JSON.parse(localStorage.getItem('vtt2Data')) || [];
         let currentRound = parseInt(localStorage.getItem('vtt2Round')) || 1;
         let activeCharIndex = localStorage.getItem('vtt2ActiveIdx');
-        
-        if(activeCharIndex !== null && activeCharIndex !== "null") activeCharIndex = parseInt(activeCharIndex);
+
+        if (activeCharIndex !== null && activeCharIndex !== "null") activeCharIndex = parseInt(activeCharIndex);
         else activeCharIndex = null;
-        
+
         updateRoundDisplay();
+
+        // --- UTILIDADES ---
+        function norm(s) { return (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim(); }
+        function esc(s) { return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+        function cleanText(text) { return text ? text.replace(/_{2,}/g, '').trim() : ""; }
 
         // --- SISTEMA ---
         function updateRoundDisplay() { document.getElementById('roundDisplay').innerText = currentRound; }
@@ -99,8 +99,8 @@
         function startCombat() {
             if (characters.length === 0) return alert("Mesa vazia!");
             currentRound = 1;
-            activeCharIndex = -1; 
-            nextTurn(); 
+            activeCharIndex = -1;
+            nextTurn();
         }
 
         function nextTurn() {
@@ -109,40 +109,29 @@
             const total = characters.length;
             do {
                 activeCharIndex++;
-                if (activeCharIndex >= total) {
-                    activeCharIndex = 0;
-                    currentRound++;
-                }
+                if (activeCharIndex >= total) { activeCharIndex = 0; currentRound++; }
                 attempts++;
             } while (characters[activeCharIndex].currentHP <= 0 && attempts <= total);
 
-            if (attempts > total) {
-                alert("Todos estão derrotados!");
-                activeCharIndex = null;
-            }
+            if (attempts > total) { alert("Todos estão derrotados!"); activeCharIndex = null; }
             saveState();
         }
 
         function resetRound() {
-            if(confirm("Reiniciar combate?")) {
-                currentRound = 1;
-                activeCharIndex = null;
-                saveState();
-            }
+            if (confirm("Reiniciar combate?")) { currentRound = 1; activeCharIndex = null; saveState(); }
         }
 
         function sortInitiative() {
             characters.sort((a, b) => (b.initiative || 0) - (a.initiative || 0));
-            activeCharIndex = null; 
+            activeCharIndex = null;
             saveState();
         }
 
         // --- DADOS ---
         function rollSkill(charId, skillName, bonus) {
             const char = characters.find(c => c.id === charId);
-            const skillInfo = SKILL_DB.find(s => s.nome.toLowerCase() === skillName.toLowerCase());
-            let attrKey = 'agi'; 
-            let attrName = '???';
+            const skillInfo = SKILL_DB.find(s => norm(s.nome) === norm(skillName));
+            let attrKey = 'agi', attrName = '???';
             if (skillInfo) { attrName = skillInfo.attr; attrKey = ATTR_MAP[skillInfo.attr]; }
             const attrVal = char.stats[attrKey] || 0;
             rollDiceSystem(`TESTE DE ${skillName.toUpperCase()}`, attrVal, bonus, attrName);
@@ -152,7 +141,7 @@
             const char = characters.find(c => c.id === charId);
             const val = char.stats[attrKey];
             let displayName = "ATRIBUTO";
-            for(let [key, value] of Object.entries(ATTR_MAP)) { if(value === attrKey) displayName = key; }
+            for (let [key, value] of Object.entries(ATTR_MAP)) { if (value === attrKey) displayName = key; }
             rollDiceSystem(`TESTE DE ${displayName}`, val, 0, displayName);
         }
 
@@ -164,7 +153,7 @@
                 rolls.push(Math.floor(Math.random() * 20) + 1);
                 finalDie = Math.min(...rolls);
             } else {
-                for(let i=0; i<diceCount; i++) { rolls.push(Math.floor(Math.random() * 20) + 1); }
+                for (let i = 0; i < diceCount; i++) rolls.push(Math.floor(Math.random() * 20) + 1);
                 finalDie = Math.max(...rolls);
             }
             const total = finalDie + modifier;
@@ -177,108 +166,97 @@
             let rollsHtml = rolls.map(r => r === finalDie ? `<span class="selected">${r}</span>` : `<span class="dropped">${r}</span>`).join(', ');
             document.getElementById('diceRolls').innerHTML = `Dados: [ ${rollsHtml} ]`;
             document.getElementById('diceFinal').innerText = total;
-            document.getElementById('diceCalc').innerText = `${finalDie} (Dado) ${modifier >=0 ? '+' : ''} ${modifier} (Bônus)`;
+            document.getElementById('diceCalc').innerText = `${finalDie} (Dado) ${modifier >= 0 ? '+' : '-'} ${Math.abs(modifier)} (Bônus)`;
             document.getElementById('diceModal').classList.add('show');
         }
 
-        function useAbility(charId, habIndex) {
-            const char = characters.find(c => c.id === charId);
-            const hab = char.parsedHabs[habIndex];
-            if (hab.cost > 0) {
-                if (char.currentPE < hab.cost) return alert("PE Insuficiente!");
-                char.currentPE -= hab.cost;
-            }
-            if (hab.linkedSkill) {
-                const bonus = char.parsedSkills[hab.linkedSkill] || 0;
-                rollSkill(charId, hab.linkedSkill, bonus);
-            } else {
-                alert(`${char.name} usou ${hab.name}!\nGastou ${hab.cost} PE.`);
-            }
-            saveState();
-        }
+        // --- IMPORTAÇÃO (PARSER REFINADO) ---
 
-        // --- IMPORTAÇÃO ---
-        function cleanText(text) { return text ? text.replace(/_{2,}/g, '').trim() : ""; }
+        // Cabeçalhos de seção reconhecidos (sem acento, minúsculo)
+        const SECTION_HEADERS = {
+            "itens": "itens", "item": "itens", "inventario": "itens", "equipamento": "itens", "equipamentos": "itens",
+            "pericias": "pericias", "pericia": "pericias",
+            "habilidades": "habilidades", "habilidade": "habilidades", "poderes": "habilidades",
+            "condicao": "condicao", "condicoes": "condicao"
+        };
 
-        function parseSkills(text) {
-            const skillMap = {};
-            const regex = /([a-zA-Zçãõâêîôû\s]+)(?:\:)?\s*\+(\d+)/g;
-            let match;
-            while ((match = regex.exec(text)) !== null) {
-                const name = match[1].trim();
-                const val = parseInt(match[2]);
-                if(name && !isNaN(val)) skillMap[name] = val;
-            }
-            return skillMap;
-        }
-
-        function parseAbilities(text, skillsMap) {
-            if (!text) return [];
-            const rawHabs = text.split(/\n\n|(?=\n[A-Z][a-zçãõ\s]+:)/); 
-            return rawHabs.map(h => {
-                const clean = h.trim();
-                if(!clean) return null;
-                const nameMatch = clean.match(/^([^:]+):/);
-                const name = nameMatch ? nameMatch[1].trim() : "Habilidade";
-                const costMatch = clean.match(/Gasta\s*(\d+)\s*PE/i) || clean.match(/Custo[:\s]*(\d+)\s*PE/i);
-                const cost = costMatch ? parseInt(costMatch[1]) : 0;
-                let linkedSkill = null;
-                for (let dbSkill of SKILL_DB) {
-                     if (clean.toLowerCase().includes(dbSkill.nome.toLowerCase())) {
-                        linkedSkill = dbSkill.nome; break;
-                     }
-                }
-                return { name, text: clean, cost, linkedSkill };
-            }).filter(h => h !== null);
-        }
-
-        function getSection(text, startAnchor, endAnchors) {
-            const startIdx = text.search(new RegExp(startAnchor, "i"));
-            if (startIdx === -1) return "";
-            let sectionContent = text.substring(startIdx + startAnchor.length);
-            let closestEnd = sectionContent.length;
-            endAnchors.forEach(anchor => {
-                const endIdx = sectionContent.search(new RegExp(anchor, "i"));
-                if (endIdx !== -1 && endIdx < closestEnd) closestEnd = endIdx;
+        // Divide a ficha em seções por linha de cabeçalho. Tudo abaixo de um cabeçalho
+        // pertence a ele até o próximo cabeçalho, então itens nunca engolem perícias.
+        function splitSections(raw) {
+            const sections = { topo: [], itens: [], pericias: [], habilidades: [], condicao: [] };
+            let current = "topo";
+            raw.split(/\r?\n/).forEach(line => {
+                const key = norm(line).replace(/\s*:\s*$/, "");
+                if (SECTION_HEADERS[key]) { current = SECTION_HEADERS[key]; return; }
+                if (/^-{3,}$/.test(line.trim())) { return; }
+                sections[current].push(line);
             });
-            return cleanText(sectionContent.substring(0, closestEnd));
+            return sections;
+        }
+
+        // Perícias: aceita "Luta +15", "Luta: +15", "Luta 15", separadas por linha, vírgula ou ;
+        function parseSkills(lines) {
+            const map = {};
+            lines.join("\n").split(/[\n,;]+/).forEach(chunk => {
+                const m = chunk.trim().match(/^(.*?)\s*[:\-–]?\s*([+-]?\s*\d+)\s*$/);
+                if (!m) return;
+                const rawName = m[1].replace(/[:\-–]+$/, "").trim();
+                const val = parseInt(m[2].replace(/\s+/g, ""));
+                if (!rawName || isNaN(val)) return;
+                const info = SKILL_DB.find(s => norm(s.nome) === norm(rawName));
+                map[info ? info.nome : rawName] = val;
+            });
+            return map;
+        }
+
+        // Entradas "Nome: descrição" (itens e habilidades). Linha que começa com "Nome:" abre
+        // uma nova entrada; linhas sem isso continuam a entrada anterior.
+        function parseEntries(lines) {
+            const entries = [];
+            lines.forEach(line => {
+                const t = cleanText(line);
+                if (!t) return;
+                const m = t.match(/^([^:|]{1,60}):\s*(.*)$/);
+                if (m) entries.push({ name: m[1].trim(), text: m[2].trim() });
+                else if (entries.length) entries[entries.length - 1].text += (entries[entries.length - 1].text ? " " : "") + t;
+                else entries.push({ name: t, text: "" });
+            });
+            return entries;
         }
 
         function importCharacter() {
             const raw = document.getElementById('importText').value;
             if (!raw.trim()) return;
-            const name = raw.split('\n')[0].split('(')[0].trim();
-            const vitMatch = raw.match(/Vitalidade:\s*(\d+)/i);
-            const peMatch = raw.match(/Pontos de Esforço \(PE\):\s*(\d+)/i);
-            const defMatch = raw.match(/Defesa:\s*(\d+)/i);
+
+            const sec = splitSections(raw);
+            const n = norm(raw);
+            const num = (re, def = 0) => { const m = n.match(re); return m ? parseInt(m[1]) : def; };
+
+            const name = raw.split('\n')[0].split('(')[0].trim() || "Sem nome";
 
             const stats = {
-                forca: parseInt(raw.match(/Força:\s*(\d+)/i)?.[1] || 0),
-                agi: parseInt(raw.match(/Agilidade:\s*(\d+)/i)?.[1] || 0),
-                int: parseInt(raw.match(/Intelecto:\s*(\d+)/i)?.[1] || 0),
-                pre: parseInt(raw.match(/Presença:\s*(\d+)/i)?.[1] || 0),
-                vig: parseInt(raw.match(/Vigor:\s*(\d+)/i)?.[1] || 0),
-                def: defMatch ? defMatch[1] : '10'
+                forca: num(/^\s*forca\s*:\s*(\d+)/m),
+                agi:   num(/^\s*agilidade\s*:\s*(\d+)/m),
+                int:   num(/^\s*intelecto\s*:\s*(\d+)/m),
+                pre:   num(/^\s*presenca\s*:\s*(\d+)/m),
+                vig:   num(/^\s*vigor\s*:\s*(\d+)/m),
+                def:   num(/^\s*defesa\s*:\s*(\d+)/m, 10)
             };
 
-            const skillsText = getSection(raw, "Perícias:|Pericias:", ["Habilidades", "Condição:"]);
-            const habsText = getSection(raw, "Habilidades", ["Condição:"]);
-            
+            const maxHP = num(/^\s*vitalidade\s*:\s*(\d+)/m, 10);
+            const maxPE = num(/^\s*pontos de esforco(?:\s*\(pe\))?\s*:\s*(\d+)/m, 5);
+
             const newChar = {
                 id: Date.now(),
                 name,
                 initiative: 0,
-                maxHP: vitMatch ? parseInt(vitMatch[1]) : 10,
-                currentHP: vitMatch ? parseInt(vitMatch[1]) : 10,
-                maxPE: peMatch ? parseInt(peMatch[1]) : 5,
-                currentPE: peMatch ? parseInt(peMatch[1]) : 5,
+                maxHP, currentHP: maxHP,
+                maxPE, currentPE: maxPE,
                 stats,
-                parsedSkills: parseSkills(skillsText),
-                parsedHabs: parseAbilities(habsText, parseSkills(skillsText)),
-                rawDetails: {
-                    itens: getSection(raw, "Itens", ["Pericias:", "Habilidades"]),
-                    condicao: getSection(raw, "Condição:", ["---"])
-                }
+                items: parseEntries(sec.itens),
+                parsedSkills: parseSkills(sec.pericias),
+                parsedHabs: parseEntries(sec.habilidades),
+                condicao: sec.condicao.map(cleanText).filter(Boolean).join("\n")
             };
             characters.push(newChar);
             document.getElementById('importText').value = '';
@@ -292,12 +270,20 @@
             else char.currentPE = Math.min(char.maxPE, Math.max(0, char.currentPE + amount));
             saveState();
         }
-        function updateInit(id, val) { const c = characters.find(x => x.id === id); if(c){c.initiative=parseInt(val); saveState();} }
-        function deleteChar(id) { if(confirm("Remover?")) { characters = characters.filter(c => c.id !== id); if(activeCharIndex>=characters.length) activeCharIndex=0; saveState(); } }
-        function closeDice(e) { if(e.target.id === 'diceModal') document.getElementById('diceModal').classList.remove('show'); }
+        function updateInit(id, val) { const c = characters.find(x => x.id === id); if (c) { c.initiative = parseInt(val) || 0; saveState(); } }
+        function deleteChar(id) { if (confirm("Remover?")) { characters = characters.filter(c => c.id !== id); if (activeCharIndex >= characters.length) activeCharIndex = 0; saveState(); } }
+        function closeDice(e) { if (e.target.id === 'diceModal') document.getElementById('diceModal').classList.remove('show'); }
         function toggleDetails(id) { document.getElementById(`details-${id}`).classList.toggle('open'); }
 
         // --- RENDER ---
+        function entryCards(list) {
+            return list.map(e => `
+                <div class="hab-card">
+                    <div class="hab-title">${esc(e.name)}</div>
+                    ${e.text ? `<div class="hab-desc">${esc(e.text)}</div>` : ''}
+                </div>`).join('');
+        }
+
         function render() {
             const grid = document.getElementById('charGrid');
             grid.innerHTML = characters.map((char, index) => {
@@ -306,41 +292,28 @@
                 const isDead = char.currentHP <= 0;
                 const isActive = (activeCharIndex === index);
 
-                // PROCESSAR ITENS (Transforma texto em tags)
-                let itemsHtml = '<span style="color:#666; font-size:0.8rem;">Nenhum item.</span>';
-                if(char.rawDetails.itens) {
-                    // Separa por quebra de linha OU vírgula
-                    const itemsList = char.rawDetails.itens.split(/[\n,]+/).map(i => i.trim()).filter(i => i);
-                    if(itemsList.length > 0) {
-                        itemsHtml = `<div class="items-container">${itemsList.map(i => `<span class="item-tag">${i}</span>`).join('')}</div>`;
-                    }
-                }
+                const itemsHtml = (char.items && char.items.length)
+                    ? entryCards(char.items)
+                    : '<span style="color:#666; font-size:0.8rem;">Nenhum item.</span>';
 
                 let skillsHtml = '';
-                for (const [key, val] of Object.entries(char.parsedSkills)) {
-                    const skillInfo = SKILL_DB.find(s => s.nome.toLowerCase() === key.toLowerCase());
+                for (const [key, val] of Object.entries(char.parsedSkills || {})) {
+                    const skillInfo = SKILL_DB.find(s => norm(s.nome) === norm(key));
                     const attrTag = skillInfo ? skillInfo.attr : '?';
-                    skillsHtml += `<button class="skill-btn" onclick="rollSkill(${char.id}, '${key}', ${val})">${key} <span class="skill-attr-tag">${attrTag}</span> <span class="skill-val">+${val}</span></button>`;
+                    const sign = val >= 0 ? '+' : '-';
+                    skillsHtml += `<button class="skill-btn" onclick="rollSkill(${char.id}, '${esc(key)}', ${val})">${esc(key)} <span class="skill-attr-tag">${attrTag}</span> <span class="skill-val">${sign}${Math.abs(val)}</span></button>`;
                 }
 
-                let habsHtml = char.parsedHabs.map((hab, hIdx) => {
-                    const btnLabel = hab.linkedSkill ? `USAR & TESTAR ${hab.linkedSkill.toUpperCase()}` : 'USAR HABILIDADE';
-                    return `
-                    <div class="hab-card">
-                        <div class="hab-title">${hab.name}</div>
-                        <div class="hab-desc">${hab.text}</div>
-                        ${hab.cost > 0 ? `<button class="use-btn" onclick="useAbility(${char.id}, ${hIdx})" ${char.currentPE < hab.cost || isDead ? 'disabled' : ''}><span>${btnLabel}</span><span>-${hab.cost} PE</span></button>` : ''}
-                    </div>`;
-                }).join('');
+                const habsHtml = entryCards(char.parsedHabs || []);
 
                 return `
                     <div class="card ${isDead ? 'dead' : ''} ${isActive ? 'active-turn' : ''}">
                         <div class="dead-overlay">DERROTADO</div>
                         <button class="delete-btn" onclick="deleteChar(${char.id})">&times;</button>
-                        
+
                         <div class="card-header">
                             <div style="display:flex; flex-direction:column;">
-                                <span class="char-name">${char.name}</span>
+                                <span class="char-name">${esc(char.name)}</span>
                                 ${isActive ? '<span style="font-size:0.7rem; color:var(--active-turn);">🔴 TURNO ATUAL</span>' : ''}
                             </div>
                             <div class="init-box">
@@ -350,7 +323,7 @@
                         </div>
 
                         <div class="stats-grid">
-                            ${Object.entries(char.stats).map(([key, val]) => `<div class="stat-box ${key==='def'?'def':''}" onclick="${key!=='def' ? `rollAttribute(${char.id}, '${key}')` : ''}"><label>${key.substring(0,3).toUpperCase()}</label><span>${val}</span></div>`).join('')}
+                            ${Object.entries(char.stats).map(([key, val]) => `<div class="stat-box ${key === 'def' ? 'def' : ''}" onclick="${key !== 'def' ? `rollAttribute(${char.id}, '${key}')` : ''}"><label>${key.substring(0, 3).toUpperCase()}</label><span>${val}</span></div>`).join('')}
                         </div>
 
                         <div class="bars-container">
@@ -362,12 +335,12 @@
                             <div class="stat-row">
                                 <div class="stat-label"><span>PE</span><span>${char.currentPE}/${char.maxPE}</span></div>
                                 <div class="bar-bg"><div class="bar-fill pe-fill" style="width: ${pePerc}%"></div></div>
-                                <div class="controls"><button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', -1)">-1</button><button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', 1)">+1</button></div>
+                                <div class="controls"><button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', -1)">-1</button><button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', 1)">+1</button><button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', -2)">-2</button><button class="ctrl-btn" onclick="updateStat(${char.id}, 'pe', 2)">+2</button></div>
                             </div>
                         </div>
 
                         <button class="btn-expand" onclick="toggleDetails(${char.id})">VER FICHÁRIO COMPLETO</button>
-                        
+
                         <div class="details-content" id="details-${char.id}">
                             <div class="detail-block">
                                 <div class="detail-header">EQUIPAMENTO & INVENTÁRIO</div>
@@ -375,10 +348,10 @@
                             </div>
 
                             ${skillsHtml ? `<div class="detail-block"><div class="detail-header">PERÍCIAS</div><div style="display:flex; flex-wrap:wrap;">${skillsHtml}</div></div>` : ''}
-                            
+
                             ${habsHtml ? `<div class="detail-block"><div class="detail-header">HABILIDADES</div>${habsHtml}</div>` : ''}
 
-                            ${char.rawDetails.condicao ? `<div class="detail-block"><div class="detail-header">CONDIÇÃO</div><div style="font-size:0.8rem; color:#ccc;">${char.rawDetails.condicao}</div></div>` : ''}
+                            ${char.condicao ? `<div class="detail-block"><div class="detail-header">CONDIÇÃO</div><div style="font-size:0.8rem; color:#ccc;">${esc(char.condicao)}</div></div>` : ''}
                         </div>
                     </div>
                 `;
